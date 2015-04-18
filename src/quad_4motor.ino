@@ -1,4 +1,4 @@
-#define kp 1.1
+#define kp 1
 #define ki 0.0
 #define kd 0.0
 
