@@ -21,7 +21,9 @@ Servo quad[4];
 double pwm[4];
 double base[4];
 char in;
-int condition;//1:stop,2:up,3:down,4:stable
+int condition;//1:stop,2:up,3:down,4:stable,5:active physical controller
+int physical_enable;
+float base_get_from_BT;
 
 int x, y, z;
 
@@ -48,6 +50,8 @@ void setup() {
   sum_err_z_theta = 0;
 
   condition = 1;
+  physical_enable = 0;
+  base_get_from_BT = 0;
   for (int i = 0; i < 4; i++) {
     pwm[i] = 0;
     base[i] = 0;
@@ -86,7 +90,7 @@ void setup() {
 
 void loop() {
 
-  if (Serial.available() > 0) {
+  if ( physical_enable == 0 && Serial.available() > 0) {
     in = Serial.read();
     switch (in) {
       case 'a'://stop
@@ -105,7 +109,19 @@ void loop() {
         condition = 4;
         Serial.println("~~STABLE~~");
         break;
+      case 'e'://active the physical controller
+        physical_enable = 1;
+        condition = 5;
+        Serial.println("~~Turn to The physical controller~~");
+        break;
     }
+  }
+
+  if (physical_enable == 1 && Serial.available() >= 4) { //get the value,the data in the serial buffer should more than 4-bytes or it will get a wrong value
+    /*get the value send by the physical controller and the set it as the base*/
+    /*parse float*/
+    /*the final character will be an alphabet to force output*/
+    base_get_from_BT = Serial.parseFloat();
   }
 
   timer = millis();
@@ -128,7 +144,7 @@ void loop() {
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
 
   p_controller_and_feedback_start(condition);
-  if (condition != 1) {
+  if (condition != 1 && base_get_from_BT >= 0) {//for security ,you should be careful when modify the segment
     i_controller();
     d_controller();
     sum_error_and_correct();
@@ -231,12 +247,26 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
     case 4:
       find_sum_p();
 
-      //CAUTION!!!!! The belowing is still in developing
+      /*CAUTION!!!!! The part that is commented is still in developing,do not uncomment the  belowing code.*/
 
       /*if  ( (angular_v_x<10 && angular_v_x>-10) && (angular_v_y<10 && angular_v_y>-10) && (err_z_accel > 0.1 | err_z_accel < -0.1) ) {
         error_correct(-kp*err_z_accel,-kp*err_z_accel,-kp*err_z_accel,-kp*err_z_accel);
       }*/
 
+      break;
+    case 5://in case 5 it should do the same thing in case4,that is "control the height"(How?)
+
+      for (int i = 0; i < 4; i++) {
+        base[i] = base_get_from_BT;
+      }
+
+      for (int i = 0; i < 4; i++) {
+        if (base[i] >= 60) {
+          base[i] = 60;
+        }
+      }
+      find_sum_p();
+      condition=5;
       break;
   }
 }
@@ -291,16 +321,6 @@ void speed_setting() {//set the speed
       pwm[i] = 60;
     }
   }
-
-  /*for (int i = 0; i < 4; i++) {
-    if (base[i] < 5 && condition != 1) {
-      base[i] = 5;
-    }
-
-    if (pwm[i] >= 60) {
-      base[i] = 60;
-    }
-  }*/
 
   for (int i = 0; i < 4; i++) {
     quad[i].write(pwm[i] + 80);
