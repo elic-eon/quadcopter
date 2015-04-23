@@ -117,7 +117,7 @@ void loop() {
     }
   }
 
-  if (physical_enable == 1 && Serial.available() >= 4) { //get the value,the data in the serial buffer should more than 4-bytes or it will get a wrong value
+  if (physical_enable == 1 && Serial.available() >= 4) { //get the value,the data in the serial buffer ,there should be more than 4-bytes or it will get a wrong value
     /*get the value send by the physical controller and the set it as the base*/
     /*parse float*/
     /*the final character will be an alphabet to force output*/
