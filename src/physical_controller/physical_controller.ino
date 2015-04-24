@@ -3,8 +3,10 @@
 SoftwareSerial BT(7, 9); // rx,tx
 char val;  // 儲存接收資料的變數
 float base_send_to_BT;
+long long timer;
 int mode;
 void setup() {
+  timer=millis();
   mode = 0;
   base_send_to_BT = 0;
   Serial.begin(9600);   // 與電腦序列埠連線
@@ -30,14 +32,16 @@ void loop() {
     val = BT.read();
     Serial.print(val);
   }
-  if (mode == 1) {
+  if (mode == 1 && millis()-timer>20) {
     base_send_to_BT = analogRead(1);
-    base_send_to_BT = map(base_send_to_BT, 1023, 0, 90, -10);
+    //base_send_to_BT = map(base_send_to_BT, 1023.00, 0.00, 90.00, -10.00);
+    base_send_to_BT=base_send_to_BT*(0.09765625)-10;
     if (base_send_to_BT <= 0) {
       base_send_to_BT = 0;
     }
     BT.print(base_send_to_BT);
-    BT.print("q");//terminal character
+    BT.print("q");//terminal character.
+    timer=millis();
   }
 
 }

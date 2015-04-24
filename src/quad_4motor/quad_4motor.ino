@@ -144,7 +144,7 @@ void loop() {
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
 
   p_controller_and_feedback_start(condition);
-  if (condition != 1 && base_get_from_BT >= 0) {//for security ,you should be careful when modify the segment
+  if ((physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1)) {//for security ,you should be careful when modify the segment
     i_controller();
     d_controller();
     sum_error_and_correct();
@@ -162,12 +162,12 @@ void loop() {
     Serial.print("  ");
     Serial.println((float)gyro.g.z);*/
 
-    Serial.print(theta_x, 4);
+    /*Serial.print(theta_x, 4);
     Serial.print("  ");
     Serial.print(theta_y, 4);
     Serial.print("  ");
     Serial.println(theta_z, 4);
-
+*/
     /*Serial.print("X= ");
     Serial.print(X, 4);
     Serial.print("       ");
@@ -185,7 +185,7 @@ void loop() {
       Serial.println(condition);
     */
 
-    Serial.println("PWM% : ");
+    //Serial.println("PWM% : ");
     Serial.print("M1: ");
     Serial.print(pwm[0]);
     Serial.print(" M2: ");
@@ -254,6 +254,7 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
       }*/
 
       break;
+      
     case 5://in case 5 it should do the same thing in case4,that is "control the height"(How?)
 
       for (int i = 0; i < 4; i++) {
@@ -265,6 +266,10 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
           base[i] = 60;
         }
       }
+      if(base_get_from_BT==0){
+        speed_setting(0,0,0,0);
+      }
+
       find_sum_p();
       condition=5;
       break;
@@ -313,7 +318,7 @@ void error_correct(double m1, double m2, double m3, double m4) {
 
 void speed_setting() {//set the speed
   for (int i = 0; i < 4; i++) {
-    if (pwm[i] < 5 && condition != 1) {
+    if (pwm[i] < 5 && condition != 1 && base_get_from_BT>0.1) {
       pwm[i] = 5;
     }
 
