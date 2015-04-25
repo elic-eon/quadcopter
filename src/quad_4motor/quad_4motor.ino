@@ -59,10 +59,10 @@ void setup() {
     sum_i[i] = 0;
   }
 
-  quad[0].attach(3); //attach on 3 5 7 9
-  quad[1].attach(5); //attach on 3 5 7 9
-  quad[2].attach(7); //attach on 3 5 7 9
-  quad[3].attach(9); //attach on 3 5 7 9
+  quad[0].attach(4); //attach on 4 5 6 7
+  quad[1].attach(5); //attach on 4 5 6 7
+  quad[2].attach(6); //attach on 4 5 6 7
+  quad[3].attach(7); //attach on 4 5 6 7
 
   adxl.setAxisOffset(-1, -1, 0);
   //adxl.set_bw(B00001100);
@@ -318,7 +318,7 @@ void error_correct(double m1, double m2, double m3, double m4) {
 
 void speed_setting() {//set the speed
   for (int i = 0; i < 4; i++) {
-    if (pwm[i] < 5 && condition != 1 && base_get_from_BT>0.1) {
+    if (pwm[i] < 5 &&( (physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1))) { //(physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1)
       pwm[i] = 5;
     }
 
