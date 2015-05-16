@@ -142,12 +142,15 @@ void processSerialData()
 
   // This reads in one set of data
   {
-    byte[] inBuf = new byte[4];
-    int xAccel, yAccel, zAccel, vRef, xRate, yRate;
-    g_serial.readBytes(inBuf);
+    String mystring;
+    mystring = g_serial.readStringUntil('\n');
+    println(mystring);
+    float xAccel = Float.valueOf(mystring).floatValue();
+    //byte[] inBuf = new byte[4];
+    //int xAccel, yAccel, zAccel, vRef, xRate, yRate;
+    //g_serial.readBytes(inBuf);*/
     // Had to do some type conversion since Java doesn't support unsigned bytes
-    xAccel = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);
-    println(xAccel);
+    //xAccel = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);
     /*g_serial.readBytes(inBuf);
     yAccel = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);
     g_serial.readBytes(inBuf);
