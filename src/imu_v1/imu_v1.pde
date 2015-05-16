@@ -30,8 +30,8 @@ void setup()
 {
   size(g_winW, g_winH, P2D);
 
-  println(Serial.list());
-  g_serial = new Serial(this, Serial.list()[0], 9600, 'N', 8, 1.0);
+  println(Serial.list()[2]);
+  g_serial = new Serial(this, Serial.list()[2], 9600, 'N', 8, 1.0);
   g_font = loadFont("ArialMT-20.vlw");
   textFont(g_font, 20);
   
@@ -73,7 +73,7 @@ void draw()
   
   strokeWeight(1.5);
   stroke(255, 0, 0);
-  g_graph.drawLine(g_xAccel, 0, 1024);
+  //g_graph.drawLine(g_xAccel, 0, 1024);
   /*stroke(0, 255, 0);
   g_graph.drawLine(g_yAccel, 0, 1024);
   stroke(0, 0, 255);
@@ -84,11 +84,19 @@ void draw()
   g_graph.drawLine(g_xRate, 0, 1024);
   stroke(0, 255, 255);
   g_graph.drawLine(g_yRate, 0, 1024);*/
+  if (keyPressed) {
+    g_serial.write(key);
+    //line(200, 10 ,200 ,100);
+    println(key);
+    keyPressed = false;
+    delay(300);
+  }
 }
 
 // This reads in one set of the data from the serial port
 void processSerialData()
 {
+  /*
   int inByte = 0;
   int curMatchPos = 0;
   int[] intBuf = new int[2];
@@ -129,12 +137,12 @@ void processSerialData()
       }
     }
   }
-  
+  */
   while (g_serial.available() < 2 /*  2*6  */);  // Loop until we have a full set of data
 
   // This reads in one set of data
   {
-    byte[] inBuf = new byte[2];
+    byte[] inBuf = new byte[4];
     int xAccel, yAccel, zAccel, vRef, xRate, yRate;
     g_serial.readBytes(inBuf);
     // Had to do some type conversion since Java doesn't support unsigned bytes
