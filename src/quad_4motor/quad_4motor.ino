@@ -8,7 +8,7 @@
 #define MODE_KI 1
 #define MODE_KD 2
 
-#include<Servo.h>
+#include <Servo.h>
 #include <Wire.h>
 #include <ADXL345.h>
 #include <L3G4200D.h>
@@ -131,32 +131,32 @@ void loop() {
 			break;
 		  case 'p':
 			condition = 1;
-			mode = MODE_KP;
-			Serial.print("change mode KP");
+			tuning_mode = MODE_KP;
+			Serial.print("change tuning_mode KP");
 			break;
 		  case 'i':
 			condition = 1;
-			mode = MODE_KI;
-			Serial.print("change mode KI");
+			tuning_mode = MODE_KI;
+			Serial.print("change tuning_mode KI");
 			break;
 		  case 'o':
 			condition = 1;
-			mode = MODE_KD;
-			Serial.print("change mode KD");
+			tuning_mode = MODE_KD;
+			Serial.print("change tuning_mode KD");
 			break;
 		  case 'x':
 			condition = 1;
-			if (mode == MODE_KP) {
+			if (tuning_mode == MODE_KP) {
 				x_kp = x_kp * 0.9;
 				Serial.print("DEC x_kp = ");
 				Serial.println(x_kp);
 			}
-			else if (mode == MODE_KI) {
+			else if (tuning_mode == MODE_KI) {
 				x_ki = x_ki * 0.9;
 				Serial.print("DEC x_ki = ");
 				Serial.println(x_ki);
 			}
-			else if (mode == MODE_KD) {
+			else if (tuning_mode == MODE_KD) {
 				x_kd = x_kd * 0.9;
 				Serial.print("DEC x_kd = ");
 				Serial.println(x_kd);
@@ -164,17 +164,17 @@ void loop() {
 			break;
 		  case 'y':
 			condition = 1;
-			if (mode == MODE_KP) {
+			if (tuning_mode == MODE_KP) {
 				y_kp = y_kp * 0.9;
 				Serial.print("DEC y_kp = ");
 				Serial.println(y_kp);
 			}
-			else if (mode == MODE_KI) {
+			else if (tuning_mode == MODE_KI) {
 				y_ki = y_ki * 0.9;
 				Serial.print("DEC y_ki = ");
 				Serial.println(y_ki);
 			}
-			else if (mode == MODE_KD) {
+			else if (tuning_mode == MODE_KD) {
 				y_kd = y_kd * 0.9;
 				Serial.print("DEC y_kd = ");
 				Serial.println(y_kd);
@@ -182,17 +182,17 @@ void loop() {
 			break;
 		  case 'X':
 			condition = 1;
-			if (mode == MODE_KP) {
+			if (tuning_mode == MODE_KP) {
 				x_kp = x_kp * 1.1;
 				Serial.print("INC x_kp = ");
 				Serial.println(x_kp);
 			}
-			else if (mode == MODE_KI) {
+			else if (tuning_mode == MODE_KI) {
 				x_ki = x_ki * 1.1;
 				Serial.print("INC x_ki = ");
 				Serial.println(x_ki);
 			}
-			else if (mode == MODE_KD) {
+			else if (tuning_mode == MODE_KD) {
 				x_kd = x_kd * 1.1;
 				Serial.print("INC x_kd = ");
 				Serial.println(x_kd);
@@ -200,17 +200,17 @@ void loop() {
 			break;
 		  case 'Y':
 			condition = 1;
-			if (mode == MODE_KP) {
+			if (tuning_mode == MODE_KP) {
 				y_kp = y_kp * 1.1;
 				Serial.print("INC y_kp = ");
 				Serial.println(y_kp);
 			}
-			else if (mode == MODE_KI) {
+			else if (tuning_mode == MODE_KI) {
 				y_ki = y_ki * 1.1;
 				Serial.print("INC y_ki = ");
 				Serial.println(y_ki);
 			}
-			else if (mode == MODE_KD) {
+			else if (tuning_mode == MODE_KD) {
 				y_kd = y_kd * 1.1;
 				Serial.print("INC y_kd = ");
 				Serial.println(y_kd);
