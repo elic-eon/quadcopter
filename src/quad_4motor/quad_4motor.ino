@@ -4,6 +4,9 @@
 #define Y_KP_DEFAULT 1.2
 #define Y_KI_DEFAULT 0.0
 #define Y_KD_DEFAULT 0.0
+#define MODE_KP 0
+#define MODE_KI 1
+#define MODE_KD 2
 
 #include<Servo.h>
 #include <Wire.h>
@@ -36,6 +39,7 @@ double theta_x, theta_y, theta_z;
 
 double x_kp, x_ki, x_kd;
 double y_kp, y_ki, y_kd;
+int tuning_mode;
 
 double sum_err_x_theta, sum_err_y_theta, sum_err_z_theta;//use in I-control
 double old_theta_x, old_theta_y, old_theta_z;
@@ -101,32 +105,119 @@ void setup() {
 
 void loop() {
 
-  if ( physical_enable == 0 && Serial.available() > 0) {
-    in = Serial.read();
-    switch (in) {
-      case 'a'://stop
-        condition = 1;
-        Serial.println("~~STOP~~");
-        break;
-      case 'b'://up
-        condition = 2;
-        Serial.println("~~UP~~");
-        break;
-      case 'c'://down
-        condition = 3;
-        Serial.println("~~DOWN~~");
-        break;
-      case 'd'://stable
-        condition = 4;
-        Serial.println("~~STABLE~~");
-        break;
-      case 'e'://active the physical controller
-        physical_enable = 1;
-        condition = 5;
-        Serial.println("~~Turn to The physical controller~~");
-        break;
-    }
-  }
+	if ( physical_enable == 0 && Serial.available() > 0) {
+		in = Serial.read();
+		switch (in) {
+		  case 'a'://stop
+			condition = 1;
+			Serial.println("~~STOP~~");
+			break;
+		  case 'b'://up
+			condition = 2;
+			Serial.println("~~UP~~");
+			break;
+		  case 'c'://down
+			condition = 3;
+			Serial.println("~~DOWN~~");
+			break;
+		  case 'd'://stable
+			condition = 4;
+			Serial.println("~~STABLE~~");
+			break;
+		  case 'e'://active the physical controller
+			physical_enable = 1;
+			condition = 5;
+			Serial.println("~~Turn to The physical controller~~");
+			break;
+		  case 'p':
+			condition = 1;
+			mode = MODE_KP;
+			Serial.print("change mode KP");
+			break;
+		  case 'i':
+			condition = 1;
+			mode = MODE_KI;
+			Serial.print("change mode KI");
+			break;
+		  case 'o':
+			condition = 1;
+			mode = MODE_KD;
+			Serial.print("change mode KD");
+			break;
+		  case 'x':
+			condition = 1;
+			if (mode == MODE_KP) {
+				x_kp = x_kp * 0.9;
+				Serial.print("DEC x_kp = ");
+				Serial.println(x_kp);
+			}
+			else if (mode == MODE_KI) {
+				x_ki = x_ki * 0.9;
+				Serial.print("DEC x_ki = ");
+				Serial.println(x_ki);
+			}
+			else if (mode == MODE_KD) {
+				x_kd = x_kd * 0.9;
+				Serial.print("DEC x_kd = ");
+				Serial.println(x_kd);
+			}
+			break;
+		  case 'y':
+			condition = 1;
+			if (mode == MODE_KP) {
+				y_kp = y_kp * 0.9;
+				Serial.print("DEC y_kp = ");
+				Serial.println(y_kp);
+			}
+			else if (mode == MODE_KI) {
+				y_ki = y_ki * 0.9;
+				Serial.print("DEC y_ki = ");
+				Serial.println(y_ki);
+			}
+			else if (mode == MODE_KD) {
+				y_kd = y_kd * 0.9;
+				Serial.print("DEC y_kd = ");
+				Serial.println(y_kd);
+			}
+			break;
+		  case 'X':
+			condition = 1;
+			if (mode == MODE_KP) {
+				x_kp = x_kp * 1.1;
+				Serial.print("INC x_kp = ");
+				Serial.println(x_kp);
+			}
+			else if (mode == MODE_KI) {
+				x_ki = x_ki * 1.1;
+				Serial.print("INC x_ki = ");
+				Serial.println(x_ki);
+			}
+			else if (mode == MODE_KD) {
+				x_kd = x_kd * 1.1;
+				Serial.print("INC x_kd = ");
+				Serial.println(x_kd);
+			}
+			break;
+		  case 'Y':
+			condition = 1;
+			if (mode == MODE_KP) {
+				y_kp = y_kp * 1.1;
+				Serial.print("INC y_kp = ");
+				Serial.println(y_kp);
+			}
+			else if (mode == MODE_KI) {
+				y_ki = y_ki * 1.1;
+				Serial.print("INC y_ki = ");
+				Serial.println(y_ki);
+			}
+			else if (mode == MODE_KD) {
+				y_kd = y_kd * 1.1;
+				Serial.print("INC y_kd = ");
+				Serial.println(y_kd);
+			}
+			break;
+		}
+	}
 
   if (physical_enable == 1 && Serial.available() >= 4) { //get the value,the data in the serial buffer ,there should be more than 4-bytes or it will get a wrong value
     /*get the value send by the physical controller and the set it as the base*/
@@ -155,10 +246,19 @@ void loop() {
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
 
   p_controller_and_feedback_start(condition);
-  if ((physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1)) {//for security ,you should be careful when modify the segment
-    i_controller();
-    d_controller();
-    sum_error_and_correct();
+  if (physical_enable == 1 && base_get_from_BT > 0.1) {
+	  if (condition != 1) {
+		i_controller();
+		d_controller();
+		sum_error_and_correct();
+	  }
+  }
+  else {
+	  if (condition != 1) {
+		i_controller();
+		d_controller();
+		sum_error_and_correct();
+	  }
   }
   //condition=4;
   if (millis() - data_timer > 1500) {
