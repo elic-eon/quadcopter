@@ -73,10 +73,10 @@ void draw()
   
   strokeWeight(1.5);
   stroke(255, 0, 0);
-  //g_graph.drawLine(g_xAccel, 0, 1024);
-  /*stroke(0, 255, 0);
+  g_graph.drawLine(g_xAccel, 0, 1024);
+  stroke(0, 255, 0);
   g_graph.drawLine(g_yAccel, 0, 1024);
-  stroke(0, 0, 255);
+  /*stroke(0, 0, 255);
   g_graph.drawLine(g_zAccel, 0, 1024);
   stroke(255, 255, 0);
   g_graph.drawLine(g_vRef, 0, 1024);
@@ -146,6 +146,7 @@ void processSerialData()
     mystring = g_serial.readStringUntil('\n');
     println(mystring);
     float xAccel = Float.valueOf(mystring).floatValue();
+    float yAccel = 0;
     //byte[] inBuf = new byte[4];
     //int xAccel, yAccel, zAccel, vRef, xRate, yRate;
     //g_serial.readBytes(inBuf);*/
@@ -161,10 +162,12 @@ void processSerialData()
     xRate  = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);
     g_serial.readBytes(inBuf);
     yRate  = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);*/
-    
+    xAccel *= 8;
+    xAccel += 500;
+    yAccel += 500;
     g_xAccel.addVal(xAccel);
-    /*g_yAccel.addVal(yAccel);
-    g_zAccel.addVal(zAccel);
+    g_yAccel.addVal(yAccel);
+    /*g_zAccel.addVal(zAccel);
     g_vRef.addVal(vRef);
     g_xRate.addVal(xRate);
     g_yRate.addVal(yRate);*/
