@@ -403,21 +403,20 @@ void i_controller() {
   sum_err_y_theta = 0.8 * sum_err_y_theta + theta_y;
   sum_err_z_theta = 0.8 * sum_err_z_theta + theta_z;
   find_sum_i();
-
 }
 
 void find_sum_p() {
-  sum_p[0] = y_kp * theta_y;
-  sum_p[1] = -x_kp * theta_x;
-  sum_p[2] = -y_kp * theta_y;
-  sum_p[3] = +x_kp * theta_x;
+  sum_p[0] = x_kp * theta_x;
+  sum_p[1] = -y_kp * theta_y;
+  sum_p[2] = -x_kp * theta_x;
+  sum_p[3] = y_kp * theta_y;
 }
 
 void find_sum_i() {
-  sum_i[0] = y_ki * sum_err_y_theta;
-  sum_i[1] = -x_ki * sum_err_x_theta;
-  sum_i[2] = -y_ki * sum_err_y_theta;
-  sum_i[3] = x_ki * sum_err_x_theta;
+  sum_i[0] = x_ki * sum_err_x_theta;
+  sum_i[1] = -y_ki * sum_err_y_theta;
+  sum_i[2] = -x_ki * sum_err_x_theta;
+  sum_i[3] = y_ki * sum_err_y_theta;
 }
 void sum_error_and_correct() {
   error_correct(sum_i[0] + sum_p[0] + sum_d[0], sum_i[1] + sum_p[1] + sum_d[1], sum_i[2] + sum_p[2] + sum_d[2], sum_i[3] + sum_p[3] + sum_d[3]);
