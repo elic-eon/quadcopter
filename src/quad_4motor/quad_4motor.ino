@@ -1,6 +1,6 @@
-#define kp 1.2
-#define ki 0.0
-#define kd 0.0
+#define kp 0.22
+#define ki 0
+#define kd 0
 
 #include<Servo.h>
 #include <Wire.h>
@@ -162,12 +162,12 @@ void loop() {
     Serial.print("  ");
     Serial.println((float)gyro.g.z);*/
 
-    /*Serial.print(theta_x, 4);
+    Serial.print(theta_x, 4);
     Serial.print("  ");
     Serial.print(theta_y, 4);
     Serial.print("  ");
     Serial.println(theta_z, 4);
-*/
+
     /*Serial.print("X= ");
     Serial.print(X, 4);
     Serial.print("       ");
