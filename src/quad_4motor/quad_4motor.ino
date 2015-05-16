@@ -408,7 +408,7 @@ void i_controller() {
 
 void find_sum_p() {
   sum_p[0] = y_kp * theta_y;
-  sum_p[1] = x_kp * theta_x
+  sum_p[1] = x_kp * theta_x;
   sum_p[2] = -y_kp * theta_y;
   sum_p[3] = -x_kp * theta_x;
 }
