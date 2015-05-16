@@ -1,6 +1,9 @@
-#define kp 0.22
-#define ki 0
-#define kd 0
+#define X_KP_DEFAULT 1.2
+#define X_KI_DEFAULT 0.0
+#define X_KD_DEFAULT 0.0
+#define Y_KP_DEFAULT 1.2
+#define Y_KI_DEFAULT 0.0
+#define Y_KD_DEFAULT 0.0
 
 #include<Servo.h>
 #include <Wire.h>
@@ -31,10 +34,12 @@ double X, Y, Z;
 
 double theta_x, theta_y, theta_z;
 
+double x_kp, x_ki, x_kd;
+double y_kp, y_ki, y_kd;
+
 double sum_err_x_theta, sum_err_y_theta, sum_err_z_theta;//use in I-control
 double old_theta_x, old_theta_y, old_theta_z;
 double predict_theta_x, predict_theta_y, predict_theta_z;
-
 
 double sum_p[4];//this array is used to save the values of P-control
 double sum_i[4];//this array is used to save the values of I-control
@@ -48,6 +53,12 @@ void setup() {
   sum_err_x_theta = 0;
   sum_err_y_theta = 0;
   sum_err_z_theta = 0;
+  x_kp = X_KP_DEFAULT;
+  x_ki = X_KI_DEFAULT;
+  x_kd = X_KD_DEFAULT;
+  y_kp = Y_KP_DEFAULT;
+  y_ki = Y_KI_DEFAULT;
+  y_kd = Y_KD_DEFAULT;
 
   condition = 1;
   physical_enable = 0;
@@ -279,10 +290,10 @@ void d_controller() {
   predict_theta_x = theta_x + theta_x - old_theta_x;
   predict_theta_y = theta_y + theta_y - old_theta_y;
   predict_theta_z = theta_z + theta_z - old_theta_z;
-  sum_d[0] = ( kd *  predict_theta_x ) + ( -kd *  predict_theta_y);
-  sum_d[1] = ( -kd *  predict_theta_x ) + ( -kd *  predict_theta_y);
-  sum_d[2] = ( -kd *  predict_theta_x ) + ( kd *  predict_theta_y);
-  sum_d[3] = ( kd *  predict_theta_x ) + ( kd *  predict_theta_y);
+  sum_d[0] = x_kd * predict_theta_x;
+  sum_d[1] = y_kd * predict_theta_y;
+  sum_d[2] = -x_kd * predict_theta_x;
+  sum_d[3] = -y_kd * predict_theta_y;
 
 }
 
@@ -296,17 +307,17 @@ void i_controller() {
 }
 
 void find_sum_p() {
-  sum_p[0] = ( kp * theta_x ) + ( -kp * theta_y);
-  sum_p[1] = (- kp * theta_x ) + ( -kp * theta_y);
-  sum_p[2] = (- kp * theta_x ) + ( kp * theta_y);
-  sum_p[3] = ( kp * theta_x ) + ( kp * theta_y);
+  sum_p[0] = y_kp * theta_y;
+  sum_p[1] = x_kp * theta_x
+  sum_p[2] = -y_kp * theta_y;
+  sum_p[3] = -x_kp * theta_x;
 }
 
 void find_sum_i() {
-  sum_i[0] = (ki * sum_err_x_theta ) + (- ki * sum_err_y_theta );
-  sum_i[1] = (-ki * sum_err_x_theta ) + (- ki * sum_err_y_theta );
-  sum_i[2] = (-ki * sum_err_x_theta ) + ( ki * sum_err_y_theta );
-  sum_i[3] = (ki * sum_err_x_theta ) + ( ki * sum_err_y_theta );
+  sum_i[0] = y_ki * sum_err_y_theta;
+  sum_i[1] = x_ki * sum_err_x_theta;
+  sum_i[2] = -y_ki * sum_err_y_theta;
+  sum_i[3] = -x_ki * sum_err_x_theta;
 }
 void sum_error_and_correct() {
   error_correct(sum_i[0] + sum_p[0] + sum_d[0], sum_i[1] + sum_p[1] + sum_d[1], sum_i[2] + sum_p[2] + sum_d[2], sum_i[3] + sum_p[3] + sum_d[3]);
