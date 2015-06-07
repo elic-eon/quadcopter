@@ -11,7 +11,7 @@
 import processing.serial.*;
 
 // Globals
-int g_winW             = 820;   // Window Width
+int g_winW             = 820;   
 int g_winH             = 600;   // Window Height
 boolean g_dumpToFile   = true;  // Dumps data to c:\\output.txt in a comma seperated format (easy to import into Excel)
 boolean g_enableFilter = true;  // Enables simple filter to help smooth out data.
@@ -38,18 +38,18 @@ void setup()
   // This draws the graph key info
   strokeWeight(1.5);
   stroke(255, 0, 0);     line(20, 420, 35, 420);
-  stroke(0, 255, 0);     line(20, 440, 35, 440);
-  stroke(0, 0, 255);     line(20, 460, 35, 460);
-  stroke(255, 255, 0);   line(20, 480, 35, 480);
-  stroke(255, 0, 255);   line(20, 500, 35, 500);
-  stroke(0, 255, 255);   line(20, 520, 35, 520);
+  //stroke(0, 255, 0);     line(20, 440, 35, 440);
+  //stroke(0, 0, 255);     line(20, 460, 35, 460);
+  //stroke(255, 255, 0);   line(20, 480, 35, 480);
+  //stroke(255, 0, 255);   line(20, 500, 35, 500);
+  //stroke(0, 255, 255);   line(20, 520, 35, 520);
   fill(0, 0, 0);
   text("xAccel", 40, 430);
-  text("yAccel", 40, 450);
-  text("zAccel", 40, 470);
-  text("vRef", 40, 490);
-  text("xRate", 40, 510);
-  text("yRate", 40, 530);
+  //text("yAccel", 40, 450);
+  //text("zAccel", 40, 470);
+  //text("vRef", 40, 490);
+  //text("xRate", 40, 510);
+  //text("yRate", 40, 530);
   
   /*if (g_dumpToFile)
   {
