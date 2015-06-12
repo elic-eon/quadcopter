@@ -1,9 +1,9 @@
-#define X_KP_DEFAULT 1.2
-#define X_KI_DEFAULT 0.0
-#define X_KD_DEFAULT 0.0
-#define Y_KP_DEFAULT 1.2
-#define Y_KI_DEFAULT 0.0
-#define Y_KD_DEFAULT 0.0
+#define X_KP_DEFAULT 0.115
+#define X_KI_DEFAULT 0.0008
+#define X_KD_DEFAULT 0.05
+#define Y_KP_DEFAULT 0.115
+#define Y_KI_DEFAULT 0.0008
+#define Y_KD_DEFAULT 0.05
 #define MODE_KP 0
 #define MODE_KI 1
 #define MODE_KD 2
@@ -147,73 +147,73 @@ void loop() {
 		  case 'x':
 			condition = 1;
 			if (tuning_mode == MODE_KP) {
-				x_kp = x_kp * 0.9;
+				x_kp = x_kp * 0.95;
 				//Serial.print("DEC x_kp = ");
-				//Serial.println(x_kp);
+				Serial.println(x_kp,6);
 			}
 			else if (tuning_mode == MODE_KI) {
-				x_ki = x_ki * 0.9;
+				x_ki = x_ki * 0.95;
 				//Serial.print("DEC x_ki = ");
-				//Serial.println(x_ki);
+				Serial.println(x_ki,6);
 			}
 			else if (tuning_mode == MODE_KD) {
-				x_kd = x_kd * 0.9;
+				x_kd = x_kd * 0.95;
 				//Serial.print("DEC x_kd = ");
-				//Serial.println(x_kd);
+				Serial.println(x_kd,6);
 			}
 			break;
 		  case 'y':
 			condition = 1;
 			if (tuning_mode == MODE_KP) {
-				y_kp = y_kp * 0.9;
+				y_kp = y_kp * 0.95;
 				//Serial.print("DEC y_kp = ");
-				//Serial.println(y_kp);
+				Serial.println(y_kp, 6);
 			}
 			else if (tuning_mode == MODE_KI) {
-				y_ki = y_ki * 0.9;
+				y_ki = y_ki * 0.95;
 				//Serial.print("DEC y_ki = ");
-				//Serial.println(y_ki);
+				Serial.println(y_ki, 6);
 			}
 			else if (tuning_mode == MODE_KD) {
-				y_kd = y_kd * 0.9;
+				y_kd = y_kd * 0.95;
 				//Serial.print("DEC y_kd = ");
-				//Serial.println(y_kd);
+				Serial.println(y_kd, 6);
 			}
 			break;
 		  case 'X':
 			condition = 1;
 			if (tuning_mode == MODE_KP) {
-				x_kp = x_kp * 1.1;
+				x_kp = x_kp * 1.05;
 				//Serial.print("INC x_kp = ");
-				//Serial.println(x_kp);
+				Serial.println(x_kp,6);
 			}
 			else if (tuning_mode == MODE_KI) {
-				x_ki = x_ki * 1.1;
+				x_ki = x_ki * 1.05;
 				//Serial.print("INC x_ki = ");
-				//Serial.println(x_ki);
+				Serial.println(x_ki,6);
 			}
 			else if (tuning_mode == MODE_KD) {
-				x_kd = x_kd * 1.1;
+				x_kd = x_kd * 1.05;
 				//Serial.print("INC x_kd = ");
-				//Serial.println(x_kd);
+				Serial.println(x_kd,6);
 			}
 			break;
 		  case 'Y':
 			condition = 1;
 			if (tuning_mode == MODE_KP) {
-				y_kp = y_kp * 1.1;
+				y_kp = y_kp * 1.05;
 				//Serial.print("INC y_kp = ");
-				//Serial.println(y_kp);
+				Serial.println(y_kp, 6);
 			}
 			else if (tuning_mode == MODE_KI) {
-				y_ki = y_ki * 1.1;
+				y_ki = y_ki * 1.05;
 				//Serial.print("INC y_ki = ");
-				//Serial.println(y_ki);
+				Serial.println(y_ki, 6);
 			}
 			else if (tuning_mode == MODE_KD) {
-				y_kd = y_kd * 1.1;
+				y_kd = y_kd * 1.05;
 				//Serial.print("INC y_kd = ");
-				//Serial.println(y_kd);
+				Serial.println(y_kd, 6);
 			}
 			break;
 		}
@@ -273,11 +273,11 @@ void loop() {
     Serial.print("  ");
     Serial.println((float)gyro.g.z);*/
 
-    Serial.print(theta_x, 4);
-    Serial.print("  ");
-    Serial.print(theta_y, 4);
-    Serial.print("  ");
-    Serial.println(theta_z, 4);
+    //Serial.print(theta_x, 4);
+    //Serial.print("  ");
+    //Serial.print(theta_y, 4);
+    //Serial.print("  ");
+    //Serial.println(theta_z, 4);
     
     /*Serial.print("X= ");
     Serial.print(X, 4);
@@ -297,14 +297,14 @@ void loop() {
     */
 
     //Serial.println("PWM% : ");
-    Serial.print("M1: ");
-    Serial.print(pwm[0]);
-    Serial.print(" M2: ");
-    Serial.print(pwm[1]);
-    Serial.print(" M3: ");
-    Serial.print(pwm[2]);
-    Serial.print(" M4: ");
-    Serial.println(pwm[3]);
+    //Serial.print("M1: ");
+    //Serial.print(pwm[0]);
+    //Serial.print(" M2: ");
+    //Serial.print(pwm[1]);
+    //Serial.print(" M3: ");
+    //Serial.print(pwm[2]);
+    //Serial.print(" M4: ");
+    //Serial.println(pwm[3]);
 
     // Serial.println(millis()-looping_timer);
   }
@@ -399,9 +399,9 @@ void d_controller() {
 
 void i_controller() {
 
-  sum_err_x_theta = 0.8 * sum_err_x_theta + theta_x;
-  sum_err_y_theta = 0.8 * sum_err_y_theta + theta_y;
-  sum_err_z_theta = 0.8 * sum_err_z_theta + theta_z;
+  sum_err_x_theta = 0.99 * sum_err_x_theta + theta_x;
+  sum_err_y_theta = 0.99 * sum_err_y_theta + theta_y;
+  sum_err_z_theta = 0.99 * sum_err_z_theta + theta_z;
   find_sum_i();
 }
 
@@ -423,6 +423,7 @@ void sum_error_and_correct() {
 }
 
 void error_correct(double m1, double m2, double m3, double m4) {
+  Serial.println(m2, 6);
   speed_setting(base[0] + m1, base[1] + m2, base[2] + m3, base[3] + m4);
 }
 

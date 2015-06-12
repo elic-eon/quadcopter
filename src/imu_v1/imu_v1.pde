@@ -30,7 +30,7 @@ void setup()
 {
   size(g_winW, g_winH, P2D);
 
-  println(Serial.list()[2]);
+  println(Serial.list());
   g_serial = new Serial(this, Serial.list()[2], 9600, 'N', 8, 1.0);
   g_font = loadFont("ArialMT-20.vlw");
   textFont(g_font, 20);
@@ -38,18 +38,18 @@ void setup()
   // This draws the graph key info
   strokeWeight(1.5);
   stroke(255, 0, 0);     line(20, 420, 35, 420);
-  //stroke(0, 255, 0);     line(20, 440, 35, 440);
-  //stroke(0, 0, 255);     line(20, 460, 35, 460);
-  //stroke(255, 255, 0);   line(20, 480, 35, 480);
-  //stroke(255, 0, 255);   line(20, 500, 35, 500);
-  //stroke(0, 255, 255);   line(20, 520, 35, 520);
+  stroke(0, 255, 0);     line(20, 440, 35, 440);
+  stroke(0, 0, 255);     line(20, 460, 35, 460);
+  stroke(255, 255, 0);   line(20, 480, 35, 480);
+  stroke(255, 0, 255);   line(20, 500, 35, 500);
+  stroke(0, 255, 255);   line(20, 520, 35, 520);
   fill(0, 0, 0);
   text("xAccel", 40, 430);
-  //text("yAccel", 40, 450);
-  //text("zAccel", 40, 470);
-  //text("vRef", 40, 490);
-  //text("xRate", 40, 510);
-  //text("yRate", 40, 530);
+  text("yAccel", 40, 450);
+  text("zAccel", 40, 470);
+  text("vRef", 40, 490);
+  text("xRate", 40, 510);
+  text("yRate", 40, 530);
   
   /*if (g_dumpToFile)
   {
@@ -162,7 +162,7 @@ void processSerialData()
     xRate  = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);
     g_serial.readBytes(inBuf);
     yRate  = ((int)(inBuf[1]&0xFF) << 8) + ((int)(inBuf[0]&0xFF) << 0);*/
-    xAccel *= 8;
+    xAccel *= 50;
     xAccel += 500;
     yAccel += 500;
     g_xAccel.addVal(xAccel);
