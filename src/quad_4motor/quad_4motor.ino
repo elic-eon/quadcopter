@@ -413,9 +413,9 @@ void d_controller() {
 
 void i_controller() {
 
-  sum_err_x_theta = 0.99 * sum_err_x_theta + theta_x;
-  sum_err_y_theta = 0.99 * sum_err_y_theta + theta_y;
-  sum_err_z_theta = 0.99 * sum_err_z_theta + theta_z;
+  sum_err_x_theta = sum_err_x_theta + theta_x;
+  sum_err_y_theta = sum_err_y_theta + theta_y;
+  sum_err_z_theta = sum_err_z_theta + theta_z;
   find_sum_i();
 }
 
