@@ -42,8 +42,11 @@ double y_kp, y_ki, y_kd;
 int tuning_mode;
 
 double sum_err_x_theta, sum_err_y_theta, sum_err_z_theta;//use in I-control
-double old_theta_x, old_theta_y, old_theta_z;
-double predict_theta_x, predict_theta_y, predict_theta_z;
+double angular_v_x,angular_v_y;
+
+//double old_theta_x, old_theta_y, old_theta_z;
+//double predict_theta_x, predict_theta_y, predict_theta_z;
+
 
 double sum_p[4];//this array is used to save the values of P-control
 double sum_i[4];//this array is used to save the values of I-control
@@ -96,10 +99,11 @@ void setup() {
   theta_y = (atan(X / Z) * (-57.29));
   theta_z = 0 ;
 
+  /*
   old_theta_x = theta_x;
   old_theta_y = theta_y;
   old_theta_z = theta_z;
-
+*/
   data_timer = millis();
 }
 
@@ -110,39 +114,39 @@ void loop() {
 		switch (in) {
 		  case 'a'://stop
 			condition = 1;
-			//Serial.println("~~STOP~~");
+			Serial.println("~~STOP~~");
 			break;
 		  case 'b'://up
 			condition = 2;
-			//Serial.println("~~UP~~");
+			Serial.println("~~UP~~");
 			break;
 		  case 'c'://down
 			condition = 3;
-			//Serial.println("~~DOWN~~");
+			Serial.println("~~DOWN~~");
 			break;
 		  case 'd'://stable
 			condition = 4;
-			//Serial.println("~~STABLE~~");
+			Serial.println("~~STABLE~~");
 			break;
 		  case 'e'://active the physical controller
 			physical_enable = 1;
 			condition = 5;
-			//Serial.println("~~Turn to The physical controller~~");
+			Serial.println("~~Turn to The physical controller~~");
 			break;
 		  case 'p':
 			condition = 1;
 			tuning_mode = MODE_KP;
-			//Serial.print("change tuning_mode KP");
+			Serial.print("change tuning_mode KP");
 			break;
 		  case 'i':
 			condition = 1;
 			tuning_mode = MODE_KI;
-			//Serial.print("change tuning_mode KI");
+			Serial.print("change tuning_mode KI");
 			break;
 		  case 'o':
 			condition = 1;
 			tuning_mode = MODE_KD;
-			//Serial.print("change tuning_mode KD");
+			Serial.print("change tuning_mode KD");
 			break;
 		  case 'x':
 			condition = 1;
@@ -236,15 +240,20 @@ void loop() {
   Y = y * 0.00384;
   Z = z * 0.00388;
 
-  old_theta_x = theta_x;
+  /*old_theta_x = theta_x;
   old_theta_y = theta_y;
   old_theta_z = theta_z;
-
-
+*/
+	
+  angular_v_x=(gyro.g.x  - 9.018621) * 0.0179;
+  angular_v_y=(gyro.g.y  + 2.5052198) * 0.0175;
+	
   theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) * 0.98 + (atan(Y / Z) * (57.29)) * 0.02;
   theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000)) * 0.98 + (atan(X / Z) * (-57.29)) * 0.02;
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
 
+  
+  
   p_controller_and_feedback_start(condition);
   if (physical_enable == 1 && base_get_from_BT > 0.1) {
 	  if (condition != 1) {
@@ -296,15 +305,15 @@ void loop() {
       Serial.println(condition);
     */
 
-    //Serial.println("PWM% : ");
-    //Serial.print("M1: ");
-    //Serial.print(pwm[0]);
-    //Serial.print(" M2: ");
-    //Serial.print(pwm[1]);
-    //Serial.print(" M3: ");
-    //Serial.print(pwm[2]);
-    //Serial.print(" M4: ");
-    //Serial.println(pwm[3]);
+    Serial.println("PWM% : ");
+    Serial.print("M1: ");
+    Serial.print(pwm[0]);
+    Serial.print(" M2: ");
+    Serial.print(pwm[1]);
+    Serial.print(" M3: ");
+    Serial.print(pwm[2]);
+    Serial.print(" M4: ");
+    Serial.println(pwm[3]);
 
     // Serial.println(millis()-looping_timer);
   }
@@ -360,9 +369,7 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
 
       /*CAUTION!!!!! The part that is commented is still in developing,do not uncomment the  belowing code.*/
 
-      /*if  ( (angular_v_x<10 && angular_v_x>-10) && (angular_v_y<10 && angular_v_y>-10) && (err_z_accel > 0.1 | err_z_accel < -0.1) ) {
-        error_correct(-kp*err_z_accel,-kp*err_z_accel,-kp*err_z_accel,-kp*err_z_accel);
-      }*/
+     
 
       break;
       
@@ -387,13 +394,20 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
   }
 }
 void d_controller() {
-  predict_theta_x = theta_x + theta_x - old_theta_x;
-  predict_theta_y = theta_y + theta_y - old_theta_y;
-  predict_theta_z = theta_z + theta_z - old_theta_z;
-  sum_d[0] = x_kd * predict_theta_x;
-  sum_d[1] = -y_kd * predict_theta_y;
-  sum_d[2] = -x_kd * predict_theta_x;
-  sum_d[3] = y_kd * predict_theta_y;
+
+  //predict_theta_x = theta_x + theta_x - old_theta_x;
+  //predict_theta_y = theta_y + theta_y - old_theta_y;
+  //predict_theta_z = theta_z + theta_z - old_theta_z; 
+  //sum_d[0] = x_kd * predict_theta_x;
+  //sum_d[1] = -y_kd * predict_theta_y;
+  //sum_d[2] = -x_kd * predict_theta_x;
+  //sum_d[3] = y_kd * predict_theta_y;
+  
+  sum_d[0] = x_kd * angular_v_x;
+  sum_d[1] = -y_kd * angular_v_y;
+  sum_d[2] = -x_kd * angular_v_x;
+  sum_d[3] = y_kd * angular_v_y;
+  
 
 }
 
@@ -423,7 +437,7 @@ void sum_error_and_correct() {
 }
 
 void error_correct(double m1, double m2, double m3, double m4) {
-  Serial.println(m2, 6);
+  //Serial.println(m2, 6);
   speed_setting(base[0] + m1, base[1] + m2, base[2] + m3, base[3] + m4);
 }
 
