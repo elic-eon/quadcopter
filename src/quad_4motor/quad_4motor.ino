@@ -3,7 +3,7 @@
 #define X_KD_DEFAULT 0.05
 #define Y_KP_DEFAULT 0.115
 #define Y_KI_DEFAULT 0.0008
-#define Y_KD_DEFAULT 0.05
+#define Y_KD_DEFAULT 0.06
 #define MODE_KP 0
 #define MODE_KI 1
 #define MODE_KD 2
