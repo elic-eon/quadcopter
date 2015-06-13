@@ -12,6 +12,7 @@
 #include <Wire.h>
 #include <ADXL345.h>
 #include <L3G4200D.h>
+#include <PID_v1.h>
 
 ADXL345 adxl;
 L3G4200D gyro;
@@ -44,15 +45,16 @@ int tuning_mode;
 double sum_err_x_theta, sum_err_y_theta, sum_err_z_theta;//use in I-control
 double angular_v_x,angular_v_y;
 
-//double old_theta_x, old_theta_y, old_theta_z;
-//double predict_theta_x, predict_theta_y, predict_theta_z;
+double setpoint_x,setpoint_y;
 
+double pid_out_x,pid_out_y;
 
-double sum_p[4];//this array is used to save the values of P-control
-double sum_i[4];//this array is used to save the values of I-control
-double sum_d[4];//this array is used to save the values of D-control
+PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 1, 0, 0, DIRECT);
+PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 1, 0, 0, DIRECT);
+
 
 void setup() {
+  
   looping_timer = millis();
   theta_x = 0;
   theta_y = 0;
@@ -73,8 +75,6 @@ void setup() {
   for (int i = 0; i < 4; i++) {
     pwm[i] = 0;
     base[i] = 0;
-    sum_p[i] = 0;
-    sum_i[i] = 0;
   }
 
   quad[0].attach(4); //attach on 4 5 6 7
@@ -105,6 +105,19 @@ void setup() {
   old_theta_z = theta_z;
 */
   data_timer = millis();
+  
+  setpoint_x=0;
+  setpoint_y=0;
+  
+  pid_x.SetMode(AUTOMATIC);   
+  pid_x.SetOutputLimits(-100,100); 
+  pid_x.SetSampleTime(40);
+  pid_y.SetMode(AUTOMATIC);   
+  pid_y.SetOutputLimits(-100,100); 
+  pid_y.SetSampleTime(40);
+
+  
+  
 }
 
 void loop() {
@@ -254,21 +267,23 @@ void loop() {
 
   
   
-  p_controller_and_feedback_start(condition);
+  feedback_start(condition);
   if (physical_enable == 1 && base_get_from_BT > 0.1) {
 	  if (condition != 1) {
-		i_controller();
-		d_controller();
-		sum_error_and_correct();
+		pid_x.Compute();
+		pid_y.Compute();
+		error_correct( -pid_out_x,pid_out_y,pid_out_x,-pid_out_y );
 	  }
   }
   else {
 	  if (condition != 1) {
-		i_controller();
-		d_controller();
-		sum_error_and_correct();
+		pid_x.Compute();
+		pid_y.Compute();
+		error_correct(-pid_out_x,pid_out_y,pid_out_x,-pid_out_y );
 	  }
   }
+  
+  
   //condition=4;
   if (millis() - data_timer > 1500) {
     data_timer = millis();
@@ -321,7 +336,7 @@ void loop() {
   //delay(300);
 }
 
-void p_controller_and_feedback_start(int mode) { //this function will change the pwm width by feedback control
+void feedback_start(int mode) { //this function will change the pwm width by feedback control
   switch (mode) {
     case 1:
       speed_setting(0, 0, 0, 0);
@@ -343,7 +358,7 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
           base[i] = 60;
         }
       }
-      find_sum_p();
+      //find_sum_p();
       condition = 4;
       break;
 
@@ -360,12 +375,12 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
           base[i] = 60;
         }
       }
-      find_sum_p();
+      //find_sum_p();
       condition = 4;
       break;
 
     case 4:
-      find_sum_p();
+      //find_sum_p();
 
       /*CAUTION!!!!! The part that is commented is still in developing,do not uncomment the  belowing code.*/
 
@@ -388,53 +403,14 @@ void p_controller_and_feedback_start(int mode) { //this function will change the
         speed_setting(0,0,0,0);
       }
 
-      find_sum_p();
+      //find_sum_p();
       condition=5;
       break;
   }
 }
-void d_controller() {
 
-  //predict_theta_x = theta_x + theta_x - old_theta_x;
-  //predict_theta_y = theta_y + theta_y - old_theta_y;
-  //predict_theta_z = theta_z + theta_z - old_theta_z; 
-  //sum_d[0] = x_kd * predict_theta_x;
-  //sum_d[1] = -y_kd * predict_theta_y;
-  //sum_d[2] = -x_kd * predict_theta_x;
-  //sum_d[3] = y_kd * predict_theta_y;
-  
-  sum_d[0] = x_kd * angular_v_x;
-  sum_d[1] = -y_kd * angular_v_y;
-  sum_d[2] = -x_kd * angular_v_x;
-  sum_d[3] = y_kd * angular_v_y;
-  
 
-}
 
-void i_controller() {
-
-  sum_err_x_theta = sum_err_x_theta + theta_x;
-  sum_err_y_theta = sum_err_y_theta + theta_y;
-  sum_err_z_theta = sum_err_z_theta + theta_z;
-  find_sum_i();
-}
-
-void find_sum_p() {
-  sum_p[0] = x_kp * theta_x;
-  sum_p[1] = -y_kp * theta_y;
-  sum_p[2] = -x_kp * theta_x;
-  sum_p[3] = y_kp * theta_y;
-}
-
-void find_sum_i() {
-  sum_i[0] = x_ki * sum_err_x_theta;
-  sum_i[1] = -y_ki * sum_err_y_theta;
-  sum_i[2] = -x_ki * sum_err_x_theta;
-  sum_i[3] = y_ki * sum_err_y_theta;
-}
-void sum_error_and_correct() {
-  error_correct(sum_i[0] + sum_p[0] + sum_d[0], sum_i[1] + sum_p[1] + sum_d[1], sum_i[2] + sum_p[2] + sum_d[2], sum_i[3] + sum_p[3] + sum_d[3]);
-}
 
 void error_correct(double m1, double m2, double m3, double m4) {
   //Serial.println(m2, 6);
