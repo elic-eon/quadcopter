@@ -50,7 +50,7 @@ double setpoint_x,setpoint_y;
 double pid_out_x,pid_out_y;
 
 PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 1, 0, 0, DIRECT);
-PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 1, 0, 0, DIRECT);
+PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.35, 0.17, 0.069, DIRECT);
 
 
 void setup() {
@@ -114,7 +114,7 @@ void setup() {
   pid_x.SetSampleTime(40);
   pid_y.SetMode(AUTOMATIC);   
   pid_y.SetOutputLimits(-100,100); 
-  pid_y.SetSampleTime(40);
+  pid_y.SetSampleTime(20);
 
   
   
@@ -261,10 +261,11 @@ void loop() {
   angular_v_x=(gyro.g.x  - 9.018621) * 0.0179;
   angular_v_y=(gyro.g.y  + 2.5052198) * 0.0175;
 	
-  theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) * 0.98 + (atan(Y / Z) * (57.29)) * 0.02;
-  theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000)) * 0.98 + (atan(X / Z) * (-57.29)) * 0.02;
+  theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) * 0.9996 + (atan(Y / Z) * (57.29)) * 0.0004;
+  theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000)) * 0.9996 + (atan(X / Z) * (-57.29)) * 0.0004;
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
-
+  //theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) ;
+  //theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000));
   
   
   feedback_start(condition);
