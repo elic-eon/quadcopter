@@ -49,8 +49,8 @@ double setpoint_x,setpoint_y;
 
 double pid_out_x,pid_out_y;
 
-PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 1, 0, 0, DIRECT);
-PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.35, 0.17, 0.069, DIRECT);
+PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 0.3, 0, 0, DIRECT);
+PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.3, 0.03, 0.09, DIRECT);//0.3 0.03 0.07
 
 
 void setup() {
@@ -111,7 +111,8 @@ void setup() {
   
   pid_x.SetMode(AUTOMATIC);   
   pid_x.SetOutputLimits(-100,100); 
-  pid_x.SetSampleTime(40);
+  pid_x.SetSampleTime(20);
+  
   pid_y.SetMode(AUTOMATIC);   
   pid_y.SetOutputLimits(-100,100); 
   pid_y.SetSampleTime(20);
@@ -273,7 +274,7 @@ void loop() {
 	  if (condition != 1) {
 		pid_x.Compute();
 		pid_y.Compute();
-		error_correct( -pid_out_x,pid_out_y,pid_out_x,-pid_out_y );
+		error_correct( -pid_out_x , pid_out_y, pid_out_x,-pid_out_y );
 	  }
   }
   else {
@@ -290,19 +291,19 @@ void loop() {
     data_timer = millis();
     /*Serial.print(atan(Y / Z) * (57.29));
     Serial.print("  ");
-    Serial.println(atan(X / Z) * (-57.29)); * /
-
-    /*Serial.print((float)gyro.g.x);
+    Serial.println(atan(X / Z) * (-57.29)); */
+/*
+    Serial.print((float)gyro.g.x);
     Serial.print("  ");
     Serial.print((float)gyro.g.y);
     Serial.print("  ");
     Serial.println((float)gyro.g.z);*/
 
-    //Serial.print(theta_x, 4);
-    //Serial.print("  ");
-    //Serial.print(theta_y, 4);
-    //Serial.print("  ");
-    //Serial.println(theta_z, 4);
+    Serial.print(theta_x, 4);
+    Serial.print("  ");
+    Serial.print(theta_y, 4);
+    Serial.print("  ");
+    Serial.println(theta_z, 4);
     
     /*Serial.print("X= ");
     Serial.print(X, 4);
