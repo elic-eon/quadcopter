@@ -11,12 +11,12 @@
 
 #include <Servo.h>
 #include <Wire.h>
-#include <ADXL345.h>
-#include <L3G4200D.h>
-#include <PID_v1.h>
+//#include <ADXL345.h>
+//#include <L3G4200D.h>
+#include "PID_v1.h"
 
-ADXL345 adxl;
-L3G4200D gyro;
+//ADXL345 adxl;
+//L3G4200D gyro;
 
 float data_timer;
 float timer;
@@ -83,14 +83,15 @@ void setup() {
   quad[2].attach(6); //attach on 4 5 6 7
   quad[3].attach(7); //attach on 4 5 6 7
 
-  adxl.setAxisOffset(-1, -1, 0);
+  //adxl.setAxisOffset(-1, -1, 0);
   //adxl.set_bw(B00001100);
   Serial.begin(9600);
   Wire.begin();
-  gyro.writeReg(0x20, 0x5F);
-  gyro.writeReg(0x23, 0x90);
+  //gyro.writeReg(0x20, 0x5F);
+  //gyro.writeReg(0x23, 0x90);
   timer_old = millis();
 
+/*
   adxl.powerOn();
   adxl.readAccel(&x, &y, &z);
   X = x * 0.00383;
@@ -99,6 +100,8 @@ void setup() {
   theta_x = (atan(Y / Z) * (57.29));
   theta_y = (atan(X / Z) * (-57.29));
   theta_z = 0 ;
+*/
+
 
   /*
   old_theta_x = theta_x;
@@ -248,23 +251,30 @@ void loop() {
   timer = millis();
   timer_interval = timer - timer_old;
   timer_old = timer;
-  gyro.read();
+  /********************************
+  get the sensor value ****/
+  
+  //gyro.read();
 
-  adxl.readAccel(&x, &y, &z);
+  //adxl.readAccel(&x, &y, &z);
+  /*
   X = x * 0.00383;
   Y = y * 0.00384;
   Z = z * 0.00388;
-
+*/
   /*old_theta_x = theta_x;
   old_theta_y = theta_y;
   old_theta_z = theta_z;
 */
-	
+
+  /*
   angular_v_x=(gyro.g.x  - 9.018621) * 0.0179;
   angular_v_y=(gyro.g.y  + 2.5052198) * 0.0175;
 	
   theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) * 0.9996 + (atan(Y / Z) * (57.29)) * 0.0004;
   theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000)) * 0.9996 + (atan(X / Z) * (-57.29)) * 0.0004;
+
+  */
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
   //theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) ;
   //theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000));
