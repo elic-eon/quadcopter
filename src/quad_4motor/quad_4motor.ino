@@ -10,7 +10,11 @@
 #define MODE_KD 2
 
 #include <Servo.h>
-#include <Wire.h>
+
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    #include "Wire.h"
+#endif
+
 #include "PID_v1.h"
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -116,10 +120,16 @@ void setup() {
 
   //adxl.setAxisOffset(-1, -1, 0);
   //adxl.set_bw(B00001100);
+  
+ // join I2C bus (I2Cdev library doesn't do this automatically)
+    #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+        Wire.begin();
+        TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
+    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+        Fastwire::setup(400, true);
+    #endif
+  
   Serial.begin(9600);
-
-  Wire.begin();
-  TWBR = 24;
 
   // initialize device
   Serial.println(F("Initializing I2C devices..."));
@@ -209,7 +219,10 @@ void setup() {
 void loop() {
 
   // if programming failed, don't try to do anything
-  if (!dmpReady) return;
+  if (!dmpReady) {
+    Serial.print("error!!!!!!!!!!!");
+    return;
+  }
 
   if ( physical_enable == 0 && Serial.available() > 0) {
     in = Serial.read();
