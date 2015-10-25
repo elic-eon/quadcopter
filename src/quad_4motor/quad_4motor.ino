@@ -67,11 +67,11 @@ double y_kp, y_ki, y_kd;
 int tuning_mode;
 
 double sum_err_x_theta, sum_err_y_theta, sum_err_z_theta;//use in I-control
-double angular_v_x,angular_v_y;
+double angular_v_x, angular_v_y;
 
-double setpoint_x,setpoint_y;
+double setpoint_x, setpoint_y;
 
-double pid_out_x,pid_out_y;
+double pid_out_x, pid_out_y;
 
 PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 0.3, 0, 0, DIRECT);
 PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.3, 0.03, 0.09, DIRECT);//0.3 0.03 0.07
@@ -82,11 +82,11 @@ PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.3, 0.03, 0.09, DIRECT);//0.3 0.03
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 void dmpDataReady() {
-    mpuInterrupt = true;
+  mpuInterrupt = true;
 }
 
 void setup() {
-  
+
   looping_timer = millis();
   theta_x = 0;
   theta_y = 0;
@@ -117,213 +117,213 @@ void setup() {
   //adxl.setAxisOffset(-1, -1, 0);
   //adxl.set_bw(B00001100);
   Serial.begin(9600);
-  
+
   Wire.begin();
   TWBR = 24;
 
-   // initialize device
-    Serial.println(F("Initializing I2C devices..."));
-    mpu.initialize();
+  // initialize device
+  Serial.println(F("Initializing I2C devices..."));
+  mpu.initialize();
 
-    // verify connection
-    Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-    
-    Serial.println(F("Initializing DMP..."));
-    devStatus = mpu.dmpInitialize();
+  // verify connection
+  Serial.println(F("Testing device connections..."));
+  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
-    // supply your own gyro offsets here, scaled for min sensitivity
-    
-    //***still need to test now not measure yet 2015/10/25****//
-    
-    mpu.setXGyroOffset(220);
-    mpu.setYGyroOffset(76);
-    mpu.setZGyroOffset(-85);
-    mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
+  Serial.println(F("Initializing DMP..."));
+  devStatus = mpu.dmpInitialize();
 
-    // make sure it worked (returns 0 if so)
-    if (devStatus == 0) {
-        // turn on the DMP, now that it's ready
-        Serial.println(F("Enabling DMP..."));
-        mpu.setDMPEnabled(true);
+  // supply your own gyro offsets here, scaled for min sensitivity
 
-        // enable Arduino interrupt detection
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        attachInterrupt(0, dmpDataReady, RISING);
-        mpuIntStatus = mpu.getIntStatus();
+  //***still need to test now not measure yet 2015/10/25****//
 
-        // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
-        dmpReady = true;
+  mpu.setXGyroOffset(220);
+  mpu.setYGyroOffset(76);
+  mpu.setZGyroOffset(-85);
+  mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
 
-        // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
-    } else {
-        // ERROR!
-        // 1 = initial memory load failed
-        // 2 = DMP configuration updates failed
-        // (if it's going to break, usually the code will be 1)
-        Serial.print(F("DMP Initialization failed (code "));
-        Serial.print(devStatus);
-        Serial.println(F(")"));
-    }
-  
+  // make sure it worked (returns 0 if so)
+  if (devStatus == 0) {
+    // turn on the DMP, now that it's ready
+    Serial.println(F("Enabling DMP..."));
+    mpu.setDMPEnabled(true);
+
+    // enable Arduino interrupt detection
+    Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+    attachInterrupt(0, dmpDataReady, RISING);
+    mpuIntStatus = mpu.getIntStatus();
+
+    // set our DMP Ready flag so the main loop() function knows it's okay to use it
+    Serial.println(F("DMP ready! Waiting for first interrupt..."));
+    dmpReady = true;
+
+    // get expected DMP packet size for later comparison
+    packetSize = mpu.dmpGetFIFOPacketSize();
+  } else {
+    // ERROR!
+    // 1 = initial memory load failed
+    // 2 = DMP configuration updates failed
+    // (if it's going to break, usually the code will be 1)
+    Serial.print(F("DMP Initialization failed (code "));
+    Serial.print(devStatus);
+    Serial.println(F(")"));
+  }
+
   //gyro.writeReg(0x20, 0x5F);
   //gyro.writeReg(0x23, 0x90);
   timer_old = millis();
 
-/*
-  adxl.powerOn();
-  adxl.readAccel(&x, &y, &z);
-  X = x * 0.00383;
-  Y = y * 0.00384;
-  Z = z * 0.00388;
-  theta_x = (atan(Y / Z) * (57.29));
-  theta_y = (atan(X / Z) * (-57.29));
-  theta_z = 0 ;
-*/
+  /*
+    adxl.powerOn();
+    adxl.readAccel(&x, &y, &z);
+    X = x * 0.00383;
+    Y = y * 0.00384;
+    Z = z * 0.00388;
+    theta_x = (atan(Y / Z) * (57.29));
+    theta_y = (atan(X / Z) * (-57.29));
+    theta_z = 0 ;
+  */
 
 
   /*
   old_theta_x = theta_x;
   old_theta_y = theta_y;
   old_theta_z = theta_z;
-*/
+  */
   data_timer = millis();
-  
-  setpoint_x=0;
-  setpoint_y=0;
-  
-  pid_x.SetMode(AUTOMATIC);   
-  pid_x.SetOutputLimits(-100,100); 
+
+  setpoint_x = 0;
+  setpoint_y = 0;
+
+  pid_x.SetMode(AUTOMATIC);
+  pid_x.SetOutputLimits(-100, 100);
   pid_x.SetSampleTime(20);
-  
-  pid_y.SetMode(AUTOMATIC);   
-  pid_y.SetOutputLimits(-100,100); 
+
+  pid_y.SetMode(AUTOMATIC);
+  pid_y.SetOutputLimits(-100, 100);
   pid_y.SetSampleTime(20);
 
-  
-  
+
+
 }
 
 void loop() {
-  
-   // if programming failed, don't try to do anything
-    if (!dmpReady) return;
-  
-	if ( physical_enable == 0 && Serial.available() > 0) {
-		in = Serial.read();
-		switch (in) {
-		  case 'a'://stop
-			condition = 1;
-			Serial.println("~~STOP~~");
-			break;
-		  case 'b'://up
-			condition = 2;
-			Serial.println("~~UP~~");
-			break;
-		  case 'c'://down
-			condition = 3;
-			Serial.println("~~DOWN~~");
-			break;
-		  case 'd'://stable
-			condition = 4;
-			Serial.println("~~STABLE~~");
-			break;
-		  case 'e'://active the physical controller
-			physical_enable = 1;
-			condition = 5;
-			Serial.println("~~Turn to The physical controller~~");
-			break;
-		  case 'p':
-			condition = 1;
-			tuning_mode = MODE_KP;
-			Serial.print("change tuning_mode KP");
-			break;
-		  case 'i':
-			condition = 1;
-			tuning_mode = MODE_KI;
-			Serial.print("change tuning_mode KI");
-			break;
-		  case 'o':
-			condition = 1;
-			tuning_mode = MODE_KD;
-			Serial.print("change tuning_mode KD");
-			break;
-		  case 'x':
-			condition = 1;
-			if (tuning_mode == MODE_KP) {
-				x_kp = x_kp * 0.95;
-				//Serial.print("DEC x_kp = ");
-				Serial.println(x_kp,6);
-			}
-			else if (tuning_mode == MODE_KI) {
-				x_ki = x_ki * 0.95;
-				//Serial.print("DEC x_ki = ");
-				Serial.println(x_ki,6);
-			}
-			else if (tuning_mode == MODE_KD) {
-				x_kd = x_kd * 0.95;
-				//Serial.print("DEC x_kd = ");
-				Serial.println(x_kd,6);
-			}
-			break;
-		  case 'y':
-			condition = 1;
-			if (tuning_mode == MODE_KP) {
-				y_kp = y_kp * 0.95;
-				//Serial.print("DEC y_kp = ");
-				Serial.println(y_kp, 6);
-			}
-			else if (tuning_mode == MODE_KI) {
-				y_ki = y_ki * 0.95;
-				//Serial.print("DEC y_ki = ");
-				Serial.println(y_ki, 6);
-			}
-			else if (tuning_mode == MODE_KD) {
-				y_kd = y_kd * 0.95;
-				//Serial.print("DEC y_kd = ");
-				Serial.println(y_kd, 6);
-			}
-			break;
-		  case 'X':
-			condition = 1;
-			if (tuning_mode == MODE_KP) {
-				x_kp = x_kp * 1.05;
-				//Serial.print("INC x_kp = ");
-				Serial.println(x_kp,6);
-			}
-			else if (tuning_mode == MODE_KI) {
-				x_ki = x_ki * 1.05;
-				//Serial.print("INC x_ki = ");
-				Serial.println(x_ki,6);
-			}
-			else if (tuning_mode == MODE_KD) {
-				x_kd = x_kd * 1.05;
-				//Serial.print("INC x_kd = ");
-				Serial.println(x_kd,6);
-			}
-			break;
-		  case 'Y':
-			condition = 1;
-			if (tuning_mode == MODE_KP) {
-				y_kp = y_kp * 1.05;
-				//Serial.print("INC y_kp = ");
-				Serial.println(y_kp, 6);
-			}
-			else if (tuning_mode == MODE_KI) {
-				y_ki = y_ki * 1.05;
-				//Serial.print("INC y_ki = ");
-				Serial.println(y_ki, 6);
-			}
-			else if (tuning_mode == MODE_KD) {
-				y_kd = y_kd * 1.05;
-				//Serial.print("INC y_kd = ");
-				Serial.println(y_kd, 6);
-			}
-			break;
-		}
-	}
+
+  // if programming failed, don't try to do anything
+  if (!dmpReady) return;
+
+  if ( physical_enable == 0 && Serial.available() > 0) {
+    in = Serial.read();
+    switch (in) {
+      case 'a'://stop
+        condition = 1;
+        Serial.println("~~STOP~~");
+        break;
+      case 'b'://up
+        condition = 2;
+        Serial.println("~~UP~~");
+        break;
+      case 'c'://down
+        condition = 3;
+        Serial.println("~~DOWN~~");
+        break;
+      case 'd'://stable
+        condition = 4;
+        Serial.println("~~STABLE~~");
+        break;
+      case 'e'://active the physical controller
+        physical_enable = 1;
+        condition = 5;
+        Serial.println("~~Turn to The physical controller~~");
+        break;
+      case 'p':
+        condition = 1;
+        tuning_mode = MODE_KP;
+        Serial.print("change tuning_mode KP");
+        break;
+      case 'i':
+        condition = 1;
+        tuning_mode = MODE_KI;
+        Serial.print("change tuning_mode KI");
+        break;
+      case 'o':
+        condition = 1;
+        tuning_mode = MODE_KD;
+        Serial.print("change tuning_mode KD");
+        break;
+      case 'x':
+        condition = 1;
+        if (tuning_mode == MODE_KP) {
+          x_kp = x_kp * 0.95;
+          //Serial.print("DEC x_kp = ");
+          Serial.println(x_kp, 6);
+        }
+        else if (tuning_mode == MODE_KI) {
+          x_ki = x_ki * 0.95;
+          //Serial.print("DEC x_ki = ");
+          Serial.println(x_ki, 6);
+        }
+        else if (tuning_mode == MODE_KD) {
+          x_kd = x_kd * 0.95;
+          //Serial.print("DEC x_kd = ");
+          Serial.println(x_kd, 6);
+        }
+        break;
+      case 'y':
+        condition = 1;
+        if (tuning_mode == MODE_KP) {
+          y_kp = y_kp * 0.95;
+          //Serial.print("DEC y_kp = ");
+          Serial.println(y_kp, 6);
+        }
+        else if (tuning_mode == MODE_KI) {
+          y_ki = y_ki * 0.95;
+          //Serial.print("DEC y_ki = ");
+          Serial.println(y_ki, 6);
+        }
+        else if (tuning_mode == MODE_KD) {
+          y_kd = y_kd * 0.95;
+          //Serial.print("DEC y_kd = ");
+          Serial.println(y_kd, 6);
+        }
+        break;
+      case 'X':
+        condition = 1;
+        if (tuning_mode == MODE_KP) {
+          x_kp = x_kp * 1.05;
+          //Serial.print("INC x_kp = ");
+          Serial.println(x_kp, 6);
+        }
+        else if (tuning_mode == MODE_KI) {
+          x_ki = x_ki * 1.05;
+          //Serial.print("INC x_ki = ");
+          Serial.println(x_ki, 6);
+        }
+        else if (tuning_mode == MODE_KD) {
+          x_kd = x_kd * 1.05;
+          //Serial.print("INC x_kd = ");
+          Serial.println(x_kd, 6);
+        }
+        break;
+      case 'Y':
+        condition = 1;
+        if (tuning_mode == MODE_KP) {
+          y_kp = y_kp * 1.05;
+          //Serial.print("INC y_kp = ");
+          Serial.println(y_kp, 6);
+        }
+        else if (tuning_mode == MODE_KI) {
+          y_ki = y_ki * 1.05;
+          //Serial.print("INC y_ki = ");
+          Serial.println(y_ki, 6);
+        }
+        else if (tuning_mode == MODE_KD) {
+          y_kd = y_kd * 1.05;
+          //Serial.print("INC y_kd = ");
+          Serial.println(y_kd, 6);
+        }
+        break;
+    }
+  }
 
   if (physical_enable == 1 && Serial.available() >= 4) { //get the value,the data in the serial buffer ,there should be more than 4-bytes or it will get a wrong value
     /*get the value send by the physical controller and the set it as the base*/
@@ -339,60 +339,58 @@ void loop() {
   get the sensor value below
   ********************************/
   while (!mpuInterrupt && fifoCount < packetSize) {
-       Serial.println("wait for data");
-    }
-   // reset interrupt flag and get INT_STATUS byte
-    mpuInterrupt = false;
-    mpuIntStatus = mpu.getIntStatus();
+    Serial.println("wait for data");
+  }
+  // reset interrupt flag and get INT_STATUS byte
+  mpuInterrupt = false;
+  mpuIntStatus = mpu.getIntStatus();
 
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
+  // get current FIFO count
+  fifoCount = mpu.getFIFOCount();
 
-    // check for overflow (this should never happen unless our code is too inefficient)
-    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+  // check for overflow (this should never happen unless our code is too inefficient)
+  if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+    // reset so we can continue cleanly
+    mpu.resetFIFO();
+    Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
-    } else if (mpuIntStatus & 0x02) {
-        // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+  } else if (mpuIntStatus & 0x02) {
+    // wait for correct available data length, should be a VERY short wait
+    while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-        
-        // track FIFO count here in case there is > 1 packet available
-        // (this lets us immediately read more without waiting for an interrupt)
-        fifoCount -= packetSize;
+    // read a packet from FIFO
+    mpu.getFIFOBytes(fifoBuffer, packetSize);
 
-
-
-            // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    // track FIFO count here in case there is > 1 packet available
+    // (this lets us immediately read more without waiting for an interrupt)
+    fifoCount -= packetSize;
 
 
-             theta_z = ypr[0] * 180/M_PI;//yaw
-             theta_y =ypr[2] * 180/M_PI;//roll
-             theta_x =ypr[1] * 180/M_PI;//pitch
-            
-             
-             Serial.print(ypr[0] * 180/M_PI);
-             Serial.print(ypr[1] * 180/M_PI);
-             Serial.println(ypr[2] * 180/M_PI);
-            
-            /*
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
-            */
-    }
-  
+
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    mpu.dmpGetGravity(&gravity, &q);
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+
+
+    theta_z = ypr[0] * 180 / M_PI; //yaw
+    
+    theta_x =- ypr[2] * 180 / M_PI; //roll
+    
+    theta_y = ypr[1] * 180 / M_PI; //pitch
+
+
+    /*
+    Serial.print("ypr\t");
+    Serial.print(ypr[0] * 180/M_PI);
+    Serial.print("\t");
+    Serial.print(ypr[1] * 180/M_PI);
+    Serial.print("\t");
+    Serial.println(ypr[2] * 180/M_PI);
+    */
+  }
+
   //gyro.read();
 
   //adxl.readAccel(&x, &y, &z);
@@ -400,16 +398,16 @@ void loop() {
   X = x * 0.00383;
   Y = y * 0.00384;
   Z = z * 0.00388;
-*/
+  */
   /*old_theta_x = theta_x;
   old_theta_y = theta_y;
   old_theta_z = theta_z;
-*/
+  */
 
   /*
   angular_v_x=(gyro.g.x  - 9.018621) * 0.0179;
   angular_v_y=(gyro.g.y  + 2.5052198) * 0.0175;
-	
+
   theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) * 0.9996 + (atan(Y / Z) * (57.29)) * 0.0004;
   theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000)) * 0.9996 + (atan(X / Z) * (-57.29)) * 0.0004;
 
@@ -417,44 +415,44 @@ void loop() {
   //theta_z = (theta_z + (gyro.g.z - 46.255112) * 0.01802 * (timer_interval / 1000));
   //theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) ;
   //theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000));
-  
-  
+
+
   feedback_start(condition);
   if (physical_enable == 1 && base_get_from_BT > 0.1) {
-	  if (condition != 1) {
-		pid_x.Compute();
-		pid_y.Compute();
-		error_correct( -pid_out_x , pid_out_y, pid_out_x,-pid_out_y );
-	  }
+    if (condition != 1) {
+      pid_x.Compute();
+      pid_y.Compute();
+      error_correct( -pid_out_x , pid_out_y, pid_out_x, -pid_out_y );
+    }
   }
   else {
-	  if (condition != 1) {
-		pid_x.Compute();
-		pid_y.Compute();
-		error_correct(-pid_out_x,pid_out_y,pid_out_x,-pid_out_y );
-	  }
+    if (condition != 1) {
+      pid_x.Compute();
+      pid_y.Compute();
+      error_correct(-pid_out_x, pid_out_y, pid_out_x, -pid_out_y );
+    }
   }
-  
-  
+
+
   //condition=4;
   if (millis() - data_timer > 1500) {
     data_timer = millis();
     /*Serial.print(atan(Y / Z) * (57.29));
     Serial.print("  ");
     Serial.println(atan(X / Z) * (-57.29)); */
-/*
-    Serial.print((float)gyro.g.x);
-    Serial.print("  ");
-    Serial.print((float)gyro.g.y);
-    Serial.print("  ");
-    Serial.println((float)gyro.g.z);*/
+    /*
+        Serial.print((float)gyro.g.x);
+        Serial.print("  ");
+        Serial.print((float)gyro.g.y);
+        Serial.print("  ");
+        Serial.println((float)gyro.g.z);*/
 
     Serial.print(theta_x, 4);
     Serial.print("  ");
     Serial.print(theta_y, 4);
     Serial.print("  ");
     Serial.println(theta_z, 4);
-    
+
     /*Serial.print("X= ");
     Serial.print(X, 4);
     Serial.print("       ");
@@ -536,10 +534,10 @@ void feedback_start(int mode) { //this function will change the pwm width by fee
 
       /*CAUTION!!!!! The part that is commented is still in developing,do not uncomment the  belowing code.*/
 
-     
+
 
       break;
-      
+
     case 5://in case 5 it should do the same thing in case4,that is "control the height"(How?)
 
       for (int i = 0; i < 4; i++) {
@@ -551,12 +549,12 @@ void feedback_start(int mode) { //this function will change the pwm width by fee
           base[i] = 60;
         }
       }
-      if(base_get_from_BT==0){
-        speed_setting(0,0,0,0);
+      if (base_get_from_BT == 0) {
+        speed_setting(0, 0, 0, 0);
       }
 
       //find_sum_p();
-      condition=5;
+      condition = 5;
       break;
   }
 }
@@ -571,7 +569,7 @@ void error_correct(double m1, double m2, double m3, double m4) {
 
 void speed_setting() {//set the speed
   for (int i = 0; i < 4; i++) {
-    if (pwm[i] < 5 &&( (physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1))) { //(physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1)
+    if (pwm[i] < 5 && ( (physical_enable == 0 && condition != 1) || (physical_enable == 1 && base_get_from_BT > 0.1))) { //(physical_enable==0 && condition != 1) || (physical_enable==1 && base_get_from_BT>0.1)
       pwm[i] = 5;
     }
 
