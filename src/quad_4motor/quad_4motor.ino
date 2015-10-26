@@ -352,7 +352,7 @@ void loop() {
   get the sensor value below
   ********************************/
   while (!mpuInterrupt && fifoCount < packetSize) {
-    Serial.println("wait for data");
+   // Serial.println("wait for data1");
   }
   // reset interrupt flag and get INT_STATUS byte
   mpuInterrupt = false;
@@ -368,10 +368,10 @@ void loop() {
     Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
-  } else if (mpuIntStatus & 0x02) {
+  } else if (mpuIntStatus & 0x01) {
     // wait for correct available data length, should be a VERY short wait
     while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
+   // Serial.println("wait for data2");
     // read a packet from FIFO
     mpu.getFIFOBytes(fifoBuffer, packetSize);
 
@@ -429,6 +429,7 @@ void loop() {
   //theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) ;
   //theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000));
 
+  
 
   feedback_start(condition);
   if (physical_enable == 1 && base_get_from_BT > 0.1) {
@@ -449,6 +450,7 @@ void loop() {
 
   //condition=4;
   if (millis() - data_timer > 1500) {
+    //if (1) {
     data_timer = millis();
     /*Serial.print(atan(Y / Z) * (57.29));
     Serial.print("  ");
