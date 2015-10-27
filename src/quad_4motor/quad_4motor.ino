@@ -188,8 +188,8 @@ void setup() {
     X = x * 0.00383;
     Y = y * 0.00384;
     Z = z * 0.00388;
-    theta_x = (atan(Y / Z) * (57.29));
-    theta_y = (atan(X / Z) * (-57.29));
+    theta_x = (atan(Y / Z) * (57.29)); //error function	
+    theta_y = (atan(X / Z) * (-57.29));//error function
     theta_z = 0 ;
   */
 
