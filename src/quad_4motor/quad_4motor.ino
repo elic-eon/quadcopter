@@ -77,8 +77,8 @@ double setpoint_x, setpoint_y;
 
 double pid_out_x, pid_out_y;
 
-PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 0.3, 0, 0, DIRECT);
-PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.3, 0.03, 0.09, DIRECT);//0.3 0.03 0.07
+PID pid_x(&theta_x, &pid_out_x, &setpoint_x, 0.3, 0.05, 0.09, DIRECT);
+PID pid_y(&theta_y, &pid_out_y, &setpoint_y, 0.28, 0, 0.09, DIRECT);//0.3 0.03 0.07
 
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
@@ -360,15 +360,22 @@ void loop() {
 
   // get current FIFO count
   fifoCount = mpu.getFIFOCount();
-
+        /* Serial.print(" 2mpuIntStatus: ");
+         Serial.println(mpuIntStatus);*/
   // check for overflow (this should never happen unless our code is too inefficient)
-  if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+  if ((mpuIntStatus & 0x10) || fifoCount >= 1024) {
+    if(fifoCount>=1024){
+        Serial.print("ERROR fifoCount:");
+        Serial.println(fifoCount);
+        Serial.print(" mpuIntStatus: ");
+         Serial.print(mpuIntStatus);
+      }
     // reset so we can continue cleanly
     mpu.resetFIFO();
     Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
-  } else if (mpuIntStatus & 0x01) {
+  } else if (mpuIntStatus & 0x02) {
     // wait for correct available data length, should be a VERY short wait
     while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
    // Serial.println("wait for data2");
