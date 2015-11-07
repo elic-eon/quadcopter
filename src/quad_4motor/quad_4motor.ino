@@ -1,18 +1,26 @@
 //mpu6050ver
-#define X_KP_DEFAULT 0.115
-#define X_KI_DEFAULT 0.0008
-#define X_KD_DEFAULT 0.05
-#define Y_KP_DEFAULT 0.115
-#define Y_KI_DEFAULT 0.0008
-#define Y_KD_DEFAULT 0.06
+//#define X_KP_DEFAULT 0.3
+//#define X_KI_DEFAULT 0.05
+//#define X_KD_DEFAULT 0.09
+//#define Y_KP_DEFAULT 0.28
+//#define Y_KI_DEFAULT 0.02
+//#define Y_KD_DEFAULT 0.09
+
+#define scale_large 0.02
+#define scale_mid 0.01
+#define scale_small 0.005
 #define MODE_KP 0
 #define MODE_KI 1
 #define MODE_KD 2
 
 #include <Servo.h>
+#include <EEPROM.h>
+/**eeprom addrress 0-35 store the value of pid constant **/
+
+
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-    #include "Wire.h"
+#include "Wire.h"
 #endif
 
 #include "PID_v1.h"
@@ -68,7 +76,9 @@ double theta_x, theta_y, theta_z;
 
 double x_kp, x_ki, x_kd;
 double y_kp, y_ki, y_kd;
+double tuning_scale = 0;
 int tuning_mode;
+
 
 double sum_err_x_theta, sum_err_y_theta, sum_err_z_theta;//use in I-control
 double angular_v_x, angular_v_y;
@@ -98,13 +108,19 @@ void setup() {
   sum_err_x_theta = 0;
   sum_err_y_theta = 0;
   sum_err_z_theta = 0;
-  x_kp = X_KP_DEFAULT;
+  EEPROM.get(0, x_kp);
+  EEPROM.get(4, x_ki);
+  EEPROM.get(8, x_kd);
+  EEPROM.get(12, y_kp);
+  EEPROM.get(16, y_ki);
+  EEPROM.get(20, y_kd);
+  /*x_kp = X_KP_DEFAULT;
   x_ki = X_KI_DEFAULT;
   x_kd = X_KD_DEFAULT;
   y_kp = Y_KP_DEFAULT;
   y_ki = Y_KI_DEFAULT;
   y_kd = Y_KD_DEFAULT;
-
+*/
   condition = 1;
   physical_enable = 0;
   base_get_from_BT = 0;
@@ -113,22 +129,19 @@ void setup() {
     base[i] = 0;
   }
 
-  quad[0].attach(4); //attach on 4 5 6 7
-  quad[1].attach(5); //attach on 4 5 6 7
-  quad[2].attach(6); //attach on 4 5 6 7
-  quad[3].attach(7); //attach on 4 5 6 7
+
 
   //adxl.setAxisOffset(-1, -1, 0);
   //adxl.set_bw(B00001100);
-  
- // join I2C bus (I2Cdev library doesn't do this automatically)
-    #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        Wire.begin();
-        TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
-    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-        Fastwire::setup(400, true);
-    #endif
-  
+
+  // join I2C bus (I2Cdev library doesn't do this automatically)
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+  Wire.begin();
+  TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+  Fastwire::setup(400, true);
+#endif
+
   Serial.begin(9600);
 
   // initialize device
@@ -177,7 +190,10 @@ void setup() {
     Serial.print(devStatus);
     Serial.println(F(")"));
   }
-
+  quad[0].attach(4); //attach M1 on 4 5 6 7
+  quad[1].attach(5); //attach M2 on 4 5 6 7
+  quad[2].attach(6); //attach M3 on 4 5 6 7
+  quad[3].attach(7); //attach M4 on 4 5 6 7
   //gyro.writeReg(0x20, 0x5F);
   //gyro.writeReg(0x23, 0x90);
   timer_old = millis();
@@ -188,7 +204,7 @@ void setup() {
     X = x * 0.00383;
     Y = y * 0.00384;
     Z = z * 0.00388;
-    theta_x = (atan(Y / Z) * (57.29)); //error function	
+    theta_x = (atan(Y / Z) * (57.29)); //error function
     theta_y = (atan(X / Z) * (-57.29));//error function
     theta_z = 0 ;
   */
@@ -243,97 +259,162 @@ void loop() {
         condition = 4;
         Serial.println("~~STABLE~~");
         break;
-      case 'e'://active the physical controller
-        physical_enable = 1;
-        condition = 5;
-        Serial.println("~~Turn to The physical controller~~");
-        break;
+      /*
+       case 'e'://active the physical controller
+         physical_enable = 1;
+         condition = 5;
+         Serial.println("~~Turn to The physical controller~~");
+         break;
+       */
       case 'p':
-        condition = 1;
+        condition = 4;
         tuning_mode = MODE_KP;
-        Serial.print("change tuning_mode KP");
+        Serial.println("change tuning_mode KP");
         break;
       case 'i':
-        condition = 1;
+        condition = 4;
         tuning_mode = MODE_KI;
-        Serial.print("change tuning_mode KI");
+        Serial.println("change tuning_mode KI");
         break;
       case 'o':
-        condition = 1;
+        condition = 4;
         tuning_mode = MODE_KD;
-        Serial.print("change tuning_mode KD");
+        Serial.println("change tuning_mode KD");
         break;
+
+      //tuning scale setting
+      case 'q':
+        condition = 4;
+        tuning_scale = scale_large;
+        Serial.println("change the scale to large");
+        break;
+
+      case 'r':
+        condition = 4;
+        tuning_scale = scale_mid;
+        Serial.println("change the scale to mid");
+        break;
+
+      case 's':
+        condition = 4;
+        tuning_scale = scale_small;
+        Serial.println("change the scale to small");
+        break;
+
+      //Decrease
       case 'x':
-        condition = 1;
+        condition = 4;
         if (tuning_mode == MODE_KP) {
-          x_kp = x_kp * 0.95;
-          //Serial.print("DEC x_kp = ");
+          x_kp = x_kp * (1 - tuning_scale);
+          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          //x_kp = x_kp * 0.95;
+          Serial.print("DEC x_kp = ");
           Serial.println(x_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
-          x_ki = x_ki * 0.95;
-          //Serial.print("DEC x_ki = ");
+          x_ki = x_ki * (1 - tuning_scale);
+          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          //x_ki = x_ki * 0.95;
+          Serial.print("DEC x_ki = ");
           Serial.println(x_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
-          x_kd = x_kd * 0.95;
-          //Serial.print("DEC x_kd = ");
+          x_kd = x_kd * (1 - tuning_scale);
+          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          //x_kd = x_kd * 0.95;
+          Serial.print("DEC x_kd = ");
           Serial.println(x_kd, 6);
         }
         break;
+
       case 'y':
-        condition = 1;
+        condition = 4;
         if (tuning_mode == MODE_KP) {
-          y_kp = y_kp * 0.95;
-          //Serial.print("DEC y_kp = ");
+          y_kp = y_kp * (1 - tuning_scale);
+          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          //y_kp = y_kp * 0.95;
+          Serial.print("DEC y_kp = ");
           Serial.println(y_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
-          y_ki = y_ki * 0.95;
-          //Serial.print("DEC y_ki = ");
+          y_ki = y_ki * (1 - tuning_scale);
+          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          //y_ki = y_ki * 0.95;
+          Serial.print("DEC y_ki = ");
           Serial.println(y_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
-          y_kd = y_kd * 0.95;
-          //Serial.print("DEC y_kd = ");
+          y_kd = y_kd * (1 - tuning_scale);
+          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          //y_kd = y_kd * 0.95;
+          Serial.print("DEC y_kd = ");
           Serial.println(y_kd, 6);
         }
         break;
+
+      //Increase
       case 'X':
-        condition = 1;
+        condition = 4;
         if (tuning_mode == MODE_KP) {
-          x_kp = x_kp * 1.05;
-          //Serial.print("INC x_kp = ");
+          x_kp = x_kp * (1 + tuning_scale);
+          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          //x_kp = x_kp * 1.05;
+          Serial.print("INC x_kp = ");
           Serial.println(x_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
-          x_ki = x_ki * 1.05;
-          //Serial.print("INC x_ki = ");
+          x_ki = x_ki * (1 + tuning_scale);
+          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          //x_ki = x_ki * 1.05;
+          Serial.print("INC x_ki = ");
           Serial.println(x_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
-          x_kd = x_kd * 1.05;
-          //Serial.print("INC x_kd = ");
+          x_kd = x_kd * (1 + tuning_scale);
+          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          //x_kd = x_kd * 1.05;
+          Serial.print("INC x_kd = ");
           Serial.println(x_kd, 6);
         }
         break;
+
       case 'Y':
-        condition = 1;
+        condition = 4;
         if (tuning_mode == MODE_KP) {
-          y_kp = y_kp * 1.05;
-          //Serial.print("INC y_kp = ");
+          y_kp = y_kp * (1 + tuning_scale);
+          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          //y_kp = y_kp * 1.05;
+          Serial.print("INC y_kp = ");
           Serial.println(y_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
-          y_ki = y_ki * 1.05;
-          //Serial.print("INC y_ki = ");
+          y_ki = y_ki * (1 + tuning_scale);
+          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          //y_ki = y_ki * 1.05;
+          Serial.print("INC y_ki = ");
           Serial.println(y_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
-          y_kd = y_kd * 1.05;
-          //Serial.print("INC y_kd = ");
+          y_kd = y_kd * (1 + tuning_scale);
+          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          //y_kd = y_kd * 1.05;
+          Serial.print("INC y_kd = ");
           Serial.println(y_kd, 6);
         }
+        break;
+
+      case '@':
+        Serial.println("Save the pid constant to EEPROM");
+
+        EEPROM.put(0, x_kp);
+        EEPROM.put(4, x_ki);
+        EEPROM.put(8, x_kd);
+
+        EEPROM.put(12, y_kp);
+        EEPROM.put(16, y_ki);
+        EEPROM.put(20, y_kd);
+
+        Serial.println("Sucess");
         break;
     }
   }
@@ -352,7 +433,7 @@ void loop() {
   get the sensor value below
   ********************************/
   while (!mpuInterrupt && fifoCount < packetSize) {
-   // Serial.println("wait for data1");
+    // Serial.println("wait for data1");
   }
   // reset interrupt flag and get INT_STATUS byte
   mpuInterrupt = false;
@@ -360,25 +441,25 @@ void loop() {
 
   // get current FIFO count
   fifoCount = mpu.getFIFOCount();
-        /* Serial.print(" 2mpuIntStatus: ");
-         Serial.println(mpuIntStatus);*/
+  /* Serial.print(" 2mpuIntStatus: ");
+   Serial.println(mpuIntStatus);*/
   // check for overflow (this should never happen unless our code is too inefficient)
   if ((mpuIntStatus & 0x10) || fifoCount >= 1024) {
-    if(fifoCount>=1024){
-        Serial.print("ERROR fifoCount:");
-        Serial.println(fifoCount);
-        Serial.print(" mpuIntStatus: ");
-         Serial.print(mpuIntStatus);
-      }
+    if (fifoCount >= 1024) {
+      Serial.print("ERROR fifoCount:");
+      Serial.println(fifoCount);
+      Serial.print(" mpuIntStatus: ");
+      Serial.print(mpuIntStatus);
+    }
     // reset so we can continue cleanly
     mpu.resetFIFO();
     Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
-  } else if (mpuIntStatus & 0x02) {
+  } else if (mpuIntStatus & 0x01) {
     // wait for correct available data length, should be a VERY short wait
     while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-   // Serial.println("wait for data2");
+    // Serial.println("wait for data2");
     // read a packet from FIFO
     mpu.getFIFOBytes(fifoBuffer, packetSize);
 
@@ -395,9 +476,9 @@ void loop() {
 
 
     theta_z = ypr[0] * 180 / M_PI; //yaw
-    
-    theta_x =- ypr[2] * 180 / M_PI; //roll
-    
+
+    theta_x = - ypr[2] * 180 / M_PI; //roll
+
     theta_y = ypr[1] * 180 / M_PI; //pitch
 
 
@@ -436,7 +517,7 @@ void loop() {
   //theta_x = (theta_x + (gyro.g.x  - 9.018621) * 0.0179 * (timer_interval / 1000)) ;
   //theta_y = (theta_y + (gyro.g.y  + 2.5052198) * 0.0175 * (timer_interval / 1000));
 
-  
+
 
   feedback_start(condition);
   if (physical_enable == 1 && base_get_from_BT > 0.1) {
