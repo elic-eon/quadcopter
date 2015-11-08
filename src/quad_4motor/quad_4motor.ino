@@ -108,17 +108,17 @@ void setup() {
   sum_err_x_theta = 0;
   sum_err_y_theta = 0;
   sum_err_z_theta = 0;
-  
+
   EEPROM.get(0, x_kp);
   EEPROM.get(4, x_ki);
   EEPROM.get(8, x_kd);
   EEPROM.get(12, y_kp);
   EEPROM.get(16, y_ki);
   EEPROM.get(20, y_kd);
-  
+
   pid_x.SetTunings(x_kp, x_ki, x_kd);
   pid_y.SetTunings(y_kp, y_ki, y_kd);
-  
+
   /*x_kp = X_KP_DEFAULT;
   x_ki = X_KI_DEFAULT;
   x_kd = X_KD_DEFAULT;
@@ -427,25 +427,46 @@ void loop() {
         double tmp_out;
         EEPROM.get(0, tmp_out);
         Serial.println(tmp_out);
-        Serial.print(" ");
+
         EEPROM.get(4, tmp_out);
         Serial.println(tmp_out);
-        Serial.print(" ");
+
         EEPROM.get(8, tmp_out);
         Serial.println(tmp_out);
-        Serial.print(" ");
+
         EEPROM.get(12, tmp_out);
         Serial.println(tmp_out);
-        Serial.print(" ");
+
         EEPROM.get(16, tmp_out);
         Serial.println(tmp_out);
-        Serial.print(" ");
+
         EEPROM.get(20, tmp_out);
         Serial.println(tmp_out);
-        Serial.print(" ");
-        
-
         break;
+
+      case '#':
+        Serial.println("The pid constant now is");
+        Serial.println(x_kp);
+        Serial.println(x_ki);
+        Serial.println(x_kd);
+
+        Serial.println(y_kp);
+        Serial.println(y_ki);
+        Serial.println(y_kd);
+        break;
+      case '$':
+        Serial.println("Reload pid constant in the eeprom");
+        EEPROM.get(0, x_kp);
+        EEPROM.get(4, x_ki);
+        EEPROM.get(8, x_kd);
+        EEPROM.get(12, y_kp);
+        EEPROM.get(16, y_ki);
+        EEPROM.get(20, y_kd);
+
+        pid_x.SetTunings(x_kp, x_ki, x_kd);
+        pid_y.SetTunings(y_kp, y_ki, y_kd);
+        break;
+
     }
   }
 
