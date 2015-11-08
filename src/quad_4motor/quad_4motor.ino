@@ -108,19 +108,24 @@ void setup() {
   sum_err_x_theta = 0;
   sum_err_y_theta = 0;
   sum_err_z_theta = 0;
+  
   EEPROM.get(0, x_kp);
   EEPROM.get(4, x_ki);
   EEPROM.get(8, x_kd);
   EEPROM.get(12, y_kp);
   EEPROM.get(16, y_ki);
   EEPROM.get(20, y_kd);
+  
+  pid_x.SetTunings(x_kp, x_ki, x_kd);
+  pid_y.SetTunings(y_kp, y_ki, y_kd);
+  
   /*x_kp = X_KP_DEFAULT;
   x_ki = X_KI_DEFAULT;
   x_kd = X_KD_DEFAULT;
   y_kp = Y_KP_DEFAULT;
   y_ki = Y_KI_DEFAULT;
   y_kd = Y_KD_DEFAULT;
-*/
+  */
   condition = 1;
   physical_enable = 0;
   base_get_from_BT = 0;
@@ -142,7 +147,7 @@ void setup() {
   Fastwire::setup(400, true);
 #endif
 
-  Serial.begin(9600);
+  Serial.begin(38400);
 
   // initialize device
   Serial.println(F("Initializing I2C devices..."));
@@ -236,7 +241,7 @@ void loop() {
 
   // if programming failed, don't try to do anything
   if (!dmpReady) {
-    Serial.print("error!!!!!!!!!!!");
+    Serial.print("Programming failed!");
     return;
   }
 
@@ -267,60 +272,60 @@ void loop() {
          break;
        */
       case 'p':
-        condition = 4;
+        //condition = 4;
         tuning_mode = MODE_KP;
         Serial.println("change tuning_mode KP");
         break;
       case 'i':
-        condition = 4;
+        //condition = 4;
         tuning_mode = MODE_KI;
         Serial.println("change tuning_mode KI");
         break;
       case 'o':
-        condition = 4;
+        //condition = 4;
         tuning_mode = MODE_KD;
         Serial.println("change tuning_mode KD");
         break;
 
       //tuning scale setting
       case 'q':
-        condition = 4;
+        //condition = 4;
         tuning_scale = scale_large;
         Serial.println("change the scale to large");
         break;
 
       case 'r':
-        condition = 4;
+        //condition = 4;
         tuning_scale = scale_mid;
         Serial.println("change the scale to mid");
         break;
 
       case 's':
-        condition = 4;
+        //condition = 4;
         tuning_scale = scale_small;
         Serial.println("change the scale to small");
         break;
 
       //Decrease
       case 'x':
-        condition = 4;
+        //condition = 4;
         if (tuning_mode == MODE_KP) {
           x_kp = x_kp * (1 - tuning_scale);
-          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          pid_x.SetTunings(x_kp, x_ki, x_kd);
           //x_kp = x_kp * 0.95;
           Serial.print("DEC x_kp = ");
           Serial.println(x_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
           x_ki = x_ki * (1 - tuning_scale);
-          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          pid_x.SetTunings(x_kp, x_ki, x_kd);
           //x_ki = x_ki * 0.95;
           Serial.print("DEC x_ki = ");
           Serial.println(x_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
           x_kd = x_kd * (1 - tuning_scale);
-          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          pid_x.SetTunings(x_kp, x_ki, x_kd);
           //x_kd = x_kd * 0.95;
           Serial.print("DEC x_kd = ");
           Serial.println(x_kd, 6);
@@ -328,24 +333,24 @@ void loop() {
         break;
 
       case 'y':
-        condition = 4;
+        //condition = 4;
         if (tuning_mode == MODE_KP) {
           y_kp = y_kp * (1 - tuning_scale);
-          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          pid_y.SetTunings(y_kp, y_ki, y_kd);
           //y_kp = y_kp * 0.95;
           Serial.print("DEC y_kp = ");
           Serial.println(y_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
           y_ki = y_ki * (1 - tuning_scale);
-          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          pid_y.SetTunings(y_kp, y_ki, y_kd);
           //y_ki = y_ki * 0.95;
           Serial.print("DEC y_ki = ");
           Serial.println(y_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
           y_kd = y_kd * (1 - tuning_scale);
-          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          pid_y.SetTunings(y_kp, y_ki, y_kd);
           //y_kd = y_kd * 0.95;
           Serial.print("DEC y_kd = ");
           Serial.println(y_kd, 6);
@@ -354,24 +359,24 @@ void loop() {
 
       //Increase
       case 'X':
-        condition = 4;
+        //condition = 4;
         if (tuning_mode == MODE_KP) {
           x_kp = x_kp * (1 + tuning_scale);
-          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          pid_x.SetTunings(x_kp, x_ki, x_kd);
           //x_kp = x_kp * 1.05;
           Serial.print("INC x_kp = ");
           Serial.println(x_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
           x_ki = x_ki * (1 + tuning_scale);
-          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          pid_x.SetTunings(x_kp, x_ki, x_kd);
           //x_ki = x_ki * 1.05;
           Serial.print("INC x_ki = ");
           Serial.println(x_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
           x_kd = x_kd * (1 + tuning_scale);
-          pid_x.SetTunings(x_kp,x_ki,x_kd);
+          pid_x.SetTunings(x_kp, x_ki, x_kd);
           //x_kd = x_kd * 1.05;
           Serial.print("INC x_kd = ");
           Serial.println(x_kd, 6);
@@ -379,24 +384,24 @@ void loop() {
         break;
 
       case 'Y':
-        condition = 4;
+        //condition = 4;
         if (tuning_mode == MODE_KP) {
           y_kp = y_kp * (1 + tuning_scale);
-          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          pid_y.SetTunings(y_kp, y_ki, y_kd);
           //y_kp = y_kp * 1.05;
           Serial.print("INC y_kp = ");
           Serial.println(y_kp, 6);
         }
         else if (tuning_mode == MODE_KI) {
           y_ki = y_ki * (1 + tuning_scale);
-          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          pid_y.SetTunings(y_kp, y_ki, y_kd);
           //y_ki = y_ki * 1.05;
           Serial.print("INC y_ki = ");
           Serial.println(y_ki, 6);
         }
         else if (tuning_mode == MODE_KD) {
           y_kd = y_kd * (1 + tuning_scale);
-          pid_y.SetTunings(y_kp,y_ki,y_kd);
+          pid_y.SetTunings(y_kp, y_ki, y_kd);
           //y_kd = y_kd * 1.05;
           Serial.print("INC y_kd = ");
           Serial.println(y_kd, 6);
@@ -415,6 +420,31 @@ void loop() {
         EEPROM.put(20, y_kd);
 
         Serial.println("Sucess");
+        break;
+
+      case '!':
+        Serial.println("The pid constant in EEPROM is");
+        double tmp_out;
+        EEPROM.get(0, tmp_out);
+        Serial.println(tmp_out);
+        Serial.print(" ");
+        EEPROM.get(4, tmp_out);
+        Serial.println(tmp_out);
+        Serial.print(" ");
+        EEPROM.get(8, tmp_out);
+        Serial.println(tmp_out);
+        Serial.print(" ");
+        EEPROM.get(12, tmp_out);
+        Serial.println(tmp_out);
+        Serial.print(" ");
+        EEPROM.get(16, tmp_out);
+        Serial.println(tmp_out);
+        Serial.print(" ");
+        EEPROM.get(20, tmp_out);
+        Serial.println(tmp_out);
+        Serial.print(" ");
+        
+
         break;
     }
   }
