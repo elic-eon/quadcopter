@@ -271,6 +271,30 @@ void loop() {
          Serial.println("~~Turn to The physical controller~~");
          break;
        */
+       
+      case 'f': //left
+        setpoint_y = setpoint_y - 0.5;
+        Serial.println(setpoint_y);
+        break;
+      case 'h': //right
+        setpoint_y = setpoint_y + 0.5;
+         Serial.println(setpoint_y);
+        break;
+      case 't'://front
+        setpoint_x = setpoint_x - 0.5;
+        Serial.println(setpoint_x);
+        break;
+      case 'g'://back
+        setpoint_x = setpoint_x + 0.5;
+        Serial.println(setpoint_x);
+        break;
+      case 'v'://back
+        setpoint_x = 0;
+        setpoint_y = 0;
+        Serial.println(setpoint_x);
+        Serial.println(setpoint_y);
+        break;
+
       case 'p':
         //condition = 4;
         tuning_mode = MODE_KP;
@@ -575,14 +599,14 @@ void loop() {
     if (condition != 1) {
       pid_x.Compute();
       pid_y.Compute();
-      error_correct( -pid_out_x , pid_out_y, pid_out_x, -pid_out_y );
+      error_correct( -pid_out_x , pid_out_y, pid_out_x, -pid_out_y ); //for x-axis and y-axis
     }
   }
   else {
     if (condition != 1) {
       pid_x.Compute();
       pid_y.Compute();
-      error_correct(-pid_out_x, pid_out_y, pid_out_x, -pid_out_y );
+      error_correct(-pid_out_x, pid_out_y, pid_out_x, -pid_out_y );//for x-axis and y-axit
     }
   }
 
