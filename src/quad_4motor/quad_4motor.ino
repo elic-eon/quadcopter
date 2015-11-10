@@ -273,27 +273,40 @@ void loop() {
        */
        
       case 'f': //left
+      if(setpoint_y<=-40){
         setpoint_y = setpoint_y - 0.5;
+      }
         Serial.println(setpoint_y);
         break;
+        
       case 'h': //right
+        if(setpoint_y>=40){ 
         setpoint_y = setpoint_y + 0.5;
+        }
          Serial.println(setpoint_y);
         break;
+        
       case 't'://front
+      if(setpoint_x<=-40){
         setpoint_x = setpoint_x - 0.5;
+      }
         Serial.println(setpoint_x);
         break;
+        
       case 'g'://back
+      if(setpoint_x>=40){
         setpoint_x = setpoint_x + 0.5;
+      }
         Serial.println(setpoint_x);
         break;
-      case 'v'://back
+        
+      case 'v'://normal
         setpoint_x = 0;
         setpoint_y = 0;
         Serial.println(setpoint_x);
         Serial.println(setpoint_y);
         break;
+        
 
       case 'p':
         //condition = 4;
