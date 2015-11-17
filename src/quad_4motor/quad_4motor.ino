@@ -199,12 +199,7 @@ void setup() {
    offset[4]=YAccelOffset
    offset[5]=ZAccelOffset
   */
-  /*
-  mpu.setXGyroOffset(+45);
-  mpu.setYGyroOffset(-12);
-  mpu.setZGyroOffset(+2);
-  mpu.setZAccelOffset(+1153);
-*/
+
 /*
   int16_t raw[6] = {0};
   double offset[6] = {0};
